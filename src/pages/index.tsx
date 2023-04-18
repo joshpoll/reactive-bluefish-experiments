@@ -1,9 +1,45 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import Image from "next/image";
+import { Inter } from "next/font/google";
+import { TodoStore } from "./api/TodoStore";
+import { ObservableTodoStore } from "./api/ObservableTodoStore";
+import { Bluefish } from "./api/Bluefish";
+import { Row } from "./api/Row";
+import { Rect } from "./api/Rect";
+import { useState } from "react";
 
-const inter = Inter({ subsets: ['latin'] })
+// const todoStore = new TodoStore();
+
+// todoStore.addTodo("read MobX tutorial");
+// console.log(todoStore.report());
+
+// todoStore.addTodo("try MobX");
+// console.log(todoStore.report());
+
+// todoStore.todos[0].completed = true;
+// console.log(todoStore.report());
+
+// todoStore.todos[1].task = "try MobX in own project";
+// console.log(todoStore.report());
+
+// todoStore.todos[0].task = "grok MobX tutorial";
+// console.log(todoStore.report());
+
+const todoStore = new ObservableTodoStore();
+
+todoStore.addTodo("read MobX tutorial");
+todoStore.addTodo("try MobX");
+todoStore.todos[0].completed = true;
+todoStore.todos[1].task = "try MobX in own project";
+todoStore.todos[0].task = "grok MobX tutorial";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const [spacing, setSpacing] = useState(10);
+  const [horizontal, setHorizontal] = useState(true);
+
+  const [xPos, setXPos] = useState(10);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
@@ -18,7 +54,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            By{' '}
+            By{" "}
             <Image
               src="/vercel.svg"
               alt="Vercel Logo"
@@ -32,15 +68,63 @@ export default function Home() {
       </div>
 
       <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+        <Bluefish width={240} height={180}>
+          <Rect
+            id="singleRect"
+            x={xPos}
+            y={20}
+            width={50}
+            height={50}
+            fill="red"
+          />
+        </Bluefish>
+        <Bluefish width={500} height={180}>
+          <Row
+            id={"row"}
+            x={100}
+            y={100}
+            spacing={spacing}
+            horizontal={horizontal}
+          >
+            {/* {Array(3).map((_, i) => (
+              <Rect
+                key={i}
+                id={`rect${i}`}
+                width={50}
+                height={50}
+                fill={i % 3 === 0 ? "red" : i % 3 === 1 ? "blue" : "green"}
+              />
+            ))} */}
+            <Rect id="rect1" width={50} height={50} fill="red" />
+            <Rect id="rect2" width={50} height={50} fill="blue" />
+            <Rect id="rect3" width={50} height={50} fill="green" />
+            <Rect id="rect4" width={50} height={50} fill="yellow" />
+            <Rect id="rect5" width={50} height={50} fill="purple" />
+            <Rect id="rect6" width={50} height={50} fill="orange" />
+          </Row>
+        </Bluefish>
       </div>
+      <input
+        type="range"
+        min="0"
+        max="50"
+        value={xPos}
+        onInput={(e) => setXPos(+e.currentTarget.value)}
+      />
+      <input
+        type="range"
+        min="0"
+        max="10"
+        value={spacing}
+        onInput={(e) => setSpacing(+e.currentTarget.value)}
+      />
+      <input
+        type="checkbox"
+        checked={horizontal}
+        onChange={() => {
+          setHorizontal((prev) => !prev);
+        }}
+      />
 
       <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
         <a
@@ -50,7 +134,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Docs{' '}
+            Docs{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -69,7 +153,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Learn{' '}
+            Learn{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -88,7 +172,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Templates{' '}
+            Templates{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -107,7 +191,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
+            Deploy{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -120,5 +204,5 @@ export default function Home() {
         </a>
       </div>
     </main>
-  )
+  );
 }
