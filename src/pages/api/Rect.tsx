@@ -18,7 +18,7 @@ export type RectProps = {
   fill: string;
 };
 
-export const Rect: React.FC<RectProps> = observer((props) => {
+export const Rect: React.FC<RectProps> = (props) => {
   const { id, x, y, width, height, fill } = props;
 
   const layout = useCallback(() => {
@@ -46,4 +46,4 @@ export const Rect: React.FC<RectProps> = observer((props) => {
   );
 
   return <Layout id={id} layout={layout} paint={paint} />;
-});
+};

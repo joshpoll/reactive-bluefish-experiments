@@ -6,7 +6,6 @@ import { Bluefish } from "./api/Bluefish";
 import { Row } from "./api/Row";
 import { Rect } from "./api/Rect";
 import { useState } from "react";
-import { observer } from "mobx-react-lite";
 
 // const todoStore = new TodoStore();
 
@@ -35,37 +34,36 @@ todoStore.todos[0].task = "grok MobX tutorial";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const RowTest = observer(
-  ({ spacing, horizontal }: { spacing: number; horizontal: boolean }) => {
-    return (
-      <Bluefish width={500} height={180}>
-        <Row
-          id={"row"}
-          x={100}
-          y={100}
-          spacing={spacing}
-          horizontal={horizontal}
-        >
-          {Array.from({ length: 1000 }).map((_, i) => (
-            <Rect
-              key={i}
-              id={`rect${i}`}
-              width={50}
-              height={50}
-              fill={i % 3 === 0 ? "red" : i % 3 === 1 ? "blue" : "green"}
-            />
-          ))}
-          {/* <Rect id="rect1" width={50} height={50} fill="red" />
+const RowTest = ({
+  spacing,
+  horizontal,
+}: {
+  spacing: number;
+  horizontal: boolean;
+}) => {
+  // eslint-disable-next-line react/display-name
+  return (
+    <Bluefish width={500} height={180}>
+      <Row id={"row"} x={100} y={100} spacing={spacing} horizontal={horizontal}>
+        {Array.from({ length: 1000 }).map((_, i) => (
+          <Rect
+            key={i}
+            id={`rect${i}`}
+            width={50}
+            height={50}
+            fill={i % 3 === 0 ? "red" : i % 3 === 1 ? "blue" : "green"}
+          />
+        ))}
+        {/* <Rect id="rect1" width={50} height={50} fill="red" />
   <Rect id="rect2" width={50} height={50} fill="blue" />
   <Rect id="rect3" width={50} height={50} fill="green" />
   <Rect id="rect4" width={50} height={50} fill="yellow" />
   <Rect id="rect5" width={50} height={50} fill="purple" />
   <Rect id="rect6" width={50} height={50} fill="orange" /> */}
-        </Row>
-      </Bluefish>
-    );
-  }
-);
+      </Row>
+    </Bluefish>
+  );
+};
 
 export default function Home() {
   const [spacing, setSpacing] = useState(10);

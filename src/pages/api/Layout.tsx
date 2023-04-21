@@ -1,8 +1,10 @@
 import React, { useEffect, useContext, PropsWithChildren } from "react";
 // import { BBox, BBoxContext, BBoxStore, ScenegraphNode } from "./bboxStore";
-import { toJS, trace } from "mobx";
-import { observer } from "mobx-react-lite";
+// import { toJS, trace } from "mobx";
+// import { observer } from "mobx-react-lite";
 import { BBox, BBoxContext } from "./solidBBoxStore";
+import { observer } from "mobx-react-lite";
+import { withSolid } from "./ReactSolidState";
 
 export type LayoutProps = PropsWithChildren<{
   id: string;
@@ -11,11 +13,11 @@ export type LayoutProps = PropsWithChildren<{
   paint: (props: { bbox: BBox; children: React.ReactNode }) => JSX.Element;
 }>;
 
-export const Layout: React.FC<LayoutProps> = observer((props) => {
+export const Layout: React.FC<LayoutProps> = withSolid((props) => {
   // trace(true);
   const { id, layout, paint, children } = props;
 
-  const [scenegraph, { setBBox }] = useContext(BBoxContext)!;
+  const [scenegraph, { setBBox, createNode }] = useContext(BBoxContext)!;
 
   // useEffect(() => {
   //   const newBbox = layout();
@@ -37,13 +39,14 @@ export const Layout: React.FC<LayoutProps> = observer((props) => {
     //   bboxStore?.set(id, new ScenegraphNode(id));
     // }
     if (scenegraph[id] === undefined) {
-      setBBox(id, newBbox, id);
+      // setBBox(id, newBbox, id);
+      createNode(id);
     }
 
     setBBox(id, newBbox, id);
 
     // TODO: probably have to cleanup ownership here...
-  }, [layout, id, scenegraph, setBBox]);
+  }, [layout, id, scenegraph, setBBox, createNode]);
 
   const Paint = paint;
 
@@ -53,12 +56,16 @@ export const Layout: React.FC<LayoutProps> = observer((props) => {
   //   width: 0,
   //   height: 0,
   // };
-  const currentBbox = scenegraph[id]?.bbox ?? {
-    left: 0,
-    top: 0,
-    width: 0,
-    height: 0,
-  };
 
-  return <Paint bbox={currentBbox}>{children}</Paint>;
+  // console.log("current bbox", scenegraph[id]?.bbox);
+  const currentBbox = () =>
+    scenegraph[id]?.bbox ?? {
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
+    };
+
+  // eslint-disable-next-line react/display-name
+  return () => <Paint bbox={currentBbox()}>{children}</Paint>;
 });

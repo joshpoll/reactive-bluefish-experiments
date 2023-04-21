@@ -37,15 +37,17 @@ export type ScenegraphNode = {
   bboxOwners: BBoxOwners;
 };
 
-export const createScenegraph = (): [
-  get: { [key: string]: ScenegraphNode },
-  set: {
-    setBBox: (id: string, bbox: Partial<BBox>, owner: string) => void;
-  }
-] => {
+export const createScenegraph = (): BBoxStore => {
   const [scenegraph, setScenegraph] = createStore<{
     [key: string]: ScenegraphNode;
   }>({});
+
+  const createNode = (id: string) => {
+    setScenegraph(id, {
+      bbox: {},
+      bboxOwners: {},
+    });
+  };
 
   const setBBox = (id: string, bbox: Partial<BBox>, owner: string) => {
     setScenegraph(id, (node) => {
@@ -94,6 +96,8 @@ export const createScenegraph = (): [
       // merge currentBbox and bbox, but don't overwrite currentBbox values with undefined
       const newBBox = mergeObjects(node.bbox, bbox);
 
+      // console.log("setBBox", id, bbox, owner, newBBox, newBBoxOwners);
+
       return {
         bbox: newBBox,
         bboxOwners: newBBoxOwners,
@@ -101,13 +105,14 @@ export const createScenegraph = (): [
     });
   };
 
-  return [scenegraph, { setBBox }];
+  return [scenegraph, { setBBox, createNode }];
 };
 
 export type BBoxStore = [
   get: { [key: string]: ScenegraphNode },
   set: {
     setBBox: (id: string, bbox: Partial<BBox>, owner: string) => void;
+    createNode: (id: string) => void;
   }
 ];
 
