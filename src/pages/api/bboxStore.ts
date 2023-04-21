@@ -1,4 +1,12 @@
-import { observable, action, computed, makeObservable, autorun } from "mobx";
+import {
+  action,
+  computed,
+  makeObservable,
+  autorun,
+  trace,
+  observable,
+  ObservableMap,
+} from "mobx";
 import { createContext } from "react";
 
 export type BBox = {
@@ -32,58 +40,57 @@ function mergeObjects(
   return result;
 }
 
-export class BBoxStore {
-  bboxes: Map<string, { bbox: BBox; owners: BBoxOwners }> = new Map();
+export class ScenegraphNode {
+  bbox: BBox = {};
+  bboxOwners: BBoxOwners = {};
 
-  constructor() {
+  constructor(public id: string) {
     makeObservable(this, {
-      bboxes: observable,
+      id: observable,
+      bbox: observable,
+      bboxOwners: observable,
       setBbox: action,
+      getBbox: computed,
     });
-    // console log the bboxes any time they change
-    // autorun(() => console.log(this.bboxes.values()));
   }
 
-  setBbox(id: string, bbox: Partial<BBox>, owner: string) {
-    const currentBbox = this.bboxes.get(id)?.bbox;
-    const currentOwners = this.bboxes.get(id)?.owners ?? {};
-
+  setBbox(bbox: Partial<BBox>, owner: string): void {
     if (
       bbox.left &&
-      currentOwners.left !== undefined &&
-      currentOwners.left !== owner
+      this.bboxOwners.left !== undefined &&
+      this.bboxOwners.left !== owner
     ) {
       throw new Error(
-        `${owner} tried to set ${id}'s left to ${bbox.left} but it was already set by ${currentOwners.left}. Only one component can set a bbox property.`
+        `${owner} tried to set ${this.id}'s left to ${bbox.left} but it was already set by ${this.bboxOwners.left}. Only one component can set a bbox property.`
       );
     } else if (
       bbox.top &&
-      currentOwners.top !== undefined &&
-      currentOwners.top !== owner
+      this.bboxOwners.top !== undefined &&
+      this.bboxOwners.top !== owner
     ) {
       throw new Error(
-        `${owner} tried to set ${id}'s top to ${bbox.top} but it was already set by ${currentOwners.top}. Only one component can set a bbox property.`
+        `${owner} tried to set ${this.id}'s top to ${bbox.top} but it was already set by ${this.bboxOwners.top}. Only one component can set a bbox property.`
       );
     } else if (
       bbox.width &&
-      currentOwners.width !== undefined &&
-      currentOwners.width !== owner
+      this.bboxOwners.width !== undefined &&
+      this.bboxOwners.width !== owner
     ) {
       throw new Error(
-        `${owner} tried to set ${id}'s width to ${bbox.width} but it was already set by ${currentOwners.width}. Only one component can set a bbox property.`
+        `${owner} tried to set ${this.id}'s width to ${bbox.width} but it was already set by ${this.bboxOwners.width}. Only one component can set a bbox property.`
       );
     } else if (
       bbox.height &&
-      currentOwners.height !== undefined &&
-      currentOwners.height !== owner
+      this.bboxOwners.height !== undefined &&
+      this.bboxOwners.height !== owner
     ) {
       throw new Error(
-        `${owner} tried to set ${id}'s height to ${bbox.height} but it was already set by ${currentOwners.height}. Only one component can set a bbox property.`
+        `${owner} tried to set ${this.id}'s height to ${bbox.height} but it was already set by ${this.bboxOwners.height}. Only one component can set a bbox property.`
       );
     }
 
-    const owners = {
-      ...currentOwners,
+    this.bboxOwners = {
+      ...this.bboxOwners,
       ...(bbox.left ? { left: owner } : {}),
       ...(bbox.top ? { top: owner } : {}),
       ...(bbox.width ? { width: owner } : {}),
@@ -91,17 +98,43 @@ export class BBoxStore {
     };
 
     // merge currentBbox and bbox, but don't overwrite currentBbox values with undefined
-    const newBBox = mergeObjects(currentBbox ?? {}, bbox);
-
-    this.bboxes.set(id, {
-      bbox: newBBox,
-      owners,
-    });
+    this.bbox = mergeObjects(this.bbox, bbox);
   }
 
-  getBbox(id: string): BBox | undefined {
-    return this.bboxes.get(id)?.bbox;
+  get getBbox(): BBox {
+    return this.bbox;
   }
 }
+
+// export class BBoxStore {
+//   bboxes: Map<string, ScenegraphNode> = new Map();
+
+//   constructor() {
+//     makeObservable(this, {
+//       bboxes: false,
+//       setBbox: action,
+//     });
+//     // console log the bboxes any time they change
+//     // autorun(() => console.log(this.bboxes.values()));
+//   }
+
+//   setBbox(id: string, bbox: Partial<BBox>, owner: string): number {
+//     const beginTime = Date.now();
+
+//     if (!this.bboxes.has(id)) {
+//       this.bboxes.set(id, new ScenegraphNode(id));
+//     }
+//     this.bboxes.get(id)?.setBbox(bbox, owner);
+
+//     return Date.now() - beginTime;
+//   }
+
+//   getBbox(id: string): BBox | undefined {
+//     return this.bboxes.get(id)?.bbox;
+//   }
+// }
+
+export type BBoxStore = ObservableMap<string, ScenegraphNode>;
+// const BBoxStore = observable.map<string, ScenegraphNode>;
 
 export const BBoxContext = createContext<BBoxStore | null>(null);

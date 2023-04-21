@@ -1,7 +1,13 @@
-import React, { useContext, createContext, useEffect } from "react";
+import React, {
+  useContext,
+  createContext,
+  useEffect,
+  useCallback,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { Layout } from "./Layout";
 import { BBox, BBoxContext, BBoxStore } from "./bboxStore";
+import { trace } from "mobx";
 
 export type RectProps = {
   id: string;
@@ -14,33 +20,30 @@ export type RectProps = {
 
 export const Rect: React.FC<RectProps> = observer((props) => {
   const { id, x, y, width, height, fill } = props;
-  const bboxStore = useContext(BBoxContext);
 
-  if (!bboxStore) {
-    throw new Error("BBoxContext is not provided");
-  }
-
-  const layout = () => {
+  const layout = useCallback(() => {
     return {
       left: x,
       top: y,
       width,
       height,
     };
-  };
+  }, [height, width, x, y]);
 
-  const paint = (bbox: BBox) => {
-    console.log("paint rect", bbox);
-    return (
-      <rect
-        x={bbox.left}
-        y={bbox.top}
-        width={bbox.width}
-        height={bbox.height}
-        fill={fill}
-      />
-    );
-  };
+  const paint = useCallback(
+    ({ bbox }: { bbox: BBox }) => {
+      return (
+        <rect
+          x={bbox.left}
+          y={bbox.top}
+          width={bbox.width}
+          height={bbox.height}
+          fill={fill}
+        />
+      );
+    },
+    [fill]
+  );
 
   return <Layout id={id} layout={layout} paint={paint} />;
 });

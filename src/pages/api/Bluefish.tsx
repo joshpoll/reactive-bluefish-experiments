@@ -1,5 +1,7 @@
 import { PropsWithChildren, useMemo } from "react";
-import { BBoxContext, BBoxStore } from "./bboxStore";
+// import { BBoxContext, BBoxStore } from "./bboxStore";
+import { BBoxContext, createScenegraph } from "./solidBBoxStore";
+import { observable } from "mobx";
 
 export type BluefishProps = PropsWithChildren<{
   width: number;
@@ -7,7 +9,8 @@ export type BluefishProps = PropsWithChildren<{
 }>;
 
 export const Bluefish = (props: BluefishProps) => {
-  const bboxStore = useMemo(() => new BBoxStore(), []);
+  // const bboxStore = useMemo(() => observable.map(), []);
+  const bboxStore = useMemo(() => createScenegraph(), []);
 
   return (
     <BBoxContext.Provider value={bboxStore}>

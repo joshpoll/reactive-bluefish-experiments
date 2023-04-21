@@ -1,34 +1,64 @@
 import React, { useEffect, useContext, PropsWithChildren } from "react";
-import { BBox, BBoxContext, BBoxStore } from "./bboxStore";
-import { toJS } from "mobx";
+// import { BBox, BBoxContext, BBoxStore, ScenegraphNode } from "./bboxStore";
+import { toJS, trace } from "mobx";
+import { observer } from "mobx-react-lite";
+import { BBox, BBoxContext } from "./solidBBoxStore";
 
 export type LayoutProps = PropsWithChildren<{
   id: string;
   bbox?: Partial<BBox>;
   layout: () => Partial<BBox>;
-  paint?: (bbox: BBox) => JSX.Element;
+  paint: (props: { bbox: BBox; children: React.ReactNode }) => JSX.Element;
 }>;
 
-export const Layout: React.FC<LayoutProps> = (props) => {
-  const { id, layout, paint } = props;
+export const Layout: React.FC<LayoutProps> = observer((props) => {
+  // trace(true);
+  const { id, layout, paint, children } = props;
 
-  const bboxStore = useContext(BBoxContext);
+  const [scenegraph, { setBBox }] = useContext(BBoxContext)!;
 
+  // useEffect(() => {
+  //   const newBbox = layout();
+  //   // bboxStore?.setBbox(id, newBbox, id);
+
+  //   if (!bboxStore?.has(id)) {
+  //     bboxStore?.set(id, new ScenegraphNode(id));
+  //   }
+
+  //   bboxStore?.get(id)?.setBbox(newBbox, id);
+
+  //   // TODO: probably have to cleanup ownership here...
+  // }, [layout, bboxStore, id]);
   useEffect(() => {
     const newBbox = layout();
-    bboxStore?.setBbox(id, newBbox, id);
+    // bboxStore?.setBbox(id, newBbox, id);
+
+    // if (!bboxStore?.has(id)) {
+    //   bboxStore?.set(id, new ScenegraphNode(id));
+    // }
+    if (scenegraph[id] === undefined) {
+      setBBox(id, newBbox, id);
+    }
+
+    setBBox(id, newBbox, id);
 
     // TODO: probably have to cleanup ownership here...
-  }, [layout, bboxStore, id]);
+  }, [layout, id, scenegraph, setBBox]);
 
-  const Paint = paint ?? (() => <>{props.children}</>);
+  const Paint = paint;
 
-  const currentBbox = bboxStore?.getBbox(id) ?? {
+  // const currentBbox = bboxStore?.get(id)?.bbox ?? {
+  //   left: 0,
+  //   top: 0,
+  //   width: 0,
+  //   height: 0,
+  // };
+  const currentBbox = scenegraph[id]?.bbox ?? {
     left: 0,
     top: 0,
     width: 0,
     height: 0,
   };
 
-  return <Paint {...currentBbox} />;
-};
+  return <Paint bbox={currentBbox}>{children}</Paint>;
+});
