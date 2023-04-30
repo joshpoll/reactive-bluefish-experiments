@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useCallback, useMemo } from "react";
 // import { observer } from "mobx-react-lite";
 // import { BBoxContext, BBoxStore } from "./bboxStore";
 import { Layout } from "./Layout";
-import { BBoxContext } from "./solidBBoxStore";
+import { BBox, BBoxContext, Transform } from "./solidBBoxStore";
 // import { observer } from "mobx-react-lite";
 // import { action } from "mobx";
 
@@ -42,7 +42,8 @@ export const Row: React.FC<RowProps> = (props) => {
 
     let totalTime = 0;
     // if (horizontal) {
-    let posX = x;
+    // let posX = x;
+    let posX = 0;
 
     childIds.forEach((childId) => {
       // console.time("child");
@@ -51,7 +52,10 @@ export const Row: React.FC<RowProps> = (props) => {
       const beginTime = Date.now();
       if (childBBox !== undefined) {
         // totalTime +=
-        setBBox(childId, { left: posX, top: y }, id);
+        // setBBox(childId, { left: posX, top: y }, id);
+        setBBox(childId, {}, id, {
+          translate: { x: posX, y: 0 },
+        });
         posX += (childBBox?.width ?? 0) + spacing;
       }
       const endTime = Date.now();
@@ -76,7 +80,7 @@ export const Row: React.FC<RowProps> = (props) => {
     //   });
     // }
 
-    const width = posX - x;
+    const width = posX - spacing;
     // height is the max height of all children
     const height = Math.max(
       ...childIds.map((childId) => scenegraph[childId]?.bbox.height ?? 0)
@@ -84,10 +88,18 @@ export const Row: React.FC<RowProps> = (props) => {
     console.timeEnd("layout");
 
     return {
-      left: x,
-      top: y,
-      width,
-      height,
+      bbox: {
+        left: 0,
+        top: 0,
+        width,
+        height,
+      },
+      transform: {
+        translate: {
+          x: x,
+          y: y,
+        },
+      },
     };
   }, [childIds, id, scenegraph, setBBox, spacing, x, y]);
 
@@ -98,7 +110,31 @@ export const Row: React.FC<RowProps> = (props) => {
   // return <>{children}</>;
 
   const paint = useCallback(
-    ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    ({
+      bbox,
+      children,
+      transform,
+    }: {
+      bbox: BBox;
+      transform: Transform;
+      children: React.ReactNode;
+    }) => (
+      <g
+        transform={`translate(${transform.translate.x ?? 0}, ${
+          transform.translate.y ?? 0
+        })`}
+      >
+        {children}
+        {/* <rect
+          x={bbox.left}
+          y={bbox.top}
+          width={bbox.width}
+          height={bbox.height}
+          fill="none"
+          stroke="magenta"
+        /> */}
+      </g>
+    ),
     []
   );
 

@@ -2,15 +2,22 @@ import React, { useEffect, useContext, PropsWithChildren } from "react";
 // import { BBox, BBoxContext, BBoxStore, ScenegraphNode } from "./bboxStore";
 // import { toJS, trace } from "mobx";
 // import { observer } from "mobx-react-lite";
-import { BBox, BBoxContext } from "./solidBBoxStore";
+import { BBox, BBoxContext, Transform } from "./solidBBoxStore";
 import { observer } from "mobx-react-lite";
 import { withSolid } from "./ReactSolidState";
 
 export type LayoutProps = PropsWithChildren<{
   id: string;
   bbox?: Partial<BBox>;
-  layout: () => Partial<BBox>;
-  paint: (props: { bbox: BBox; children: React.ReactNode }) => JSX.Element;
+  layout: () => {
+    bbox: Partial<BBox>;
+    transform: Transform;
+  };
+  paint: (props: {
+    bbox: BBox;
+    transform: Transform;
+    children: React.ReactNode;
+  }) => JSX.Element;
 }>;
 
 export const Layout: React.FC<LayoutProps> = withSolid((props) => {
@@ -32,7 +39,7 @@ export const Layout: React.FC<LayoutProps> = withSolid((props) => {
   //   // TODO: probably have to cleanup ownership here...
   // }, [layout, bboxStore, id]);
   useEffect(() => {
-    const newBbox = layout();
+    const { bbox, transform } = layout();
     // bboxStore?.setBbox(id, newBbox, id);
 
     // if (!bboxStore?.has(id)) {
@@ -43,7 +50,7 @@ export const Layout: React.FC<LayoutProps> = withSolid((props) => {
       createNode(id);
     }
 
-    setBBox(id, newBbox, id);
+    setBBox(id, bbox, id, transform);
 
     // TODO: probably have to cleanup ownership here...
   }, [layout, id, scenegraph, setBBox, createNode]);
@@ -66,6 +73,13 @@ export const Layout: React.FC<LayoutProps> = withSolid((props) => {
       height: 0,
     };
 
+  const currentTransform = () =>
+    scenegraph[id]?.transform ?? { translate: { x: 0, y: 0 } };
+
   // eslint-disable-next-line react/display-name
-  return () => <Paint bbox={currentBbox()}>{children}</Paint>;
+  return () => (
+    <Paint bbox={currentBbox()} transform={currentTransform()}>
+      {children}
+    </Paint>
+  );
 });

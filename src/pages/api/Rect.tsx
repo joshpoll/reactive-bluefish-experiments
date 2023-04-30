@@ -8,6 +8,7 @@ import { observer } from "mobx-react-lite";
 import { Layout } from "./Layout";
 import { BBox, BBoxContext, BBoxStore } from "./bboxStore";
 import { trace } from "mobx";
+import { Transform } from "./solidBBoxStore";
 
 export type RectProps = {
   id: string;
@@ -23,23 +24,37 @@ export const Rect: React.FC<RectProps> = (props) => {
 
   const layout = useCallback(() => {
     return {
-      left: x,
-      top: y,
-      width,
-      height,
+      bbox: {
+        left: 0,
+        top: 0,
+        width,
+        height,
+      },
+      transform: {
+        translate: {
+          x: x,
+          y: y,
+        },
+      },
     };
   }, [height, width, x, y]);
 
   const paint = useCallback(
-    ({ bbox }: { bbox: BBox }) => {
+    ({ bbox, transform }: { bbox: BBox; transform: Transform }) => {
       return (
-        <rect
-          x={bbox.left}
-          y={bbox.top}
-          width={bbox.width}
-          height={bbox.height}
-          fill={fill}
-        />
+        <g
+          transform={`translate(${transform.translate.x ?? 0}, ${
+            transform.translate.y ?? 0
+          })`}
+        >
+          <rect
+            x={bbox.left}
+            y={bbox.top}
+            width={bbox.width}
+            height={bbox.height}
+            fill={fill}
+          />
+        </g>
       );
     },
     [fill]
