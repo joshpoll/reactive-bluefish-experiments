@@ -1,5 +1,11 @@
-import { createContext } from "react";
+import { createContext, useContext } from "react";
 import { createStore } from "solid-js/store";
+
+/* 
+TODO: should I create a Ref node like Row or like Layout? Should I expose a createRef function? What
+about createNode? It's only used in Layout, so I'm not sure...
+
+*/
 
 export type BBox = {
   left?: number;
@@ -73,6 +79,10 @@ export const createScenegraph = (): BBoxStore => {
         translate: {},
       },
     });
+  };
+
+  const createRef = (id: string, refId: string) => {
+    setScenegraph(id, scenegraph[refId]);
   };
 
   const setBBox = (
@@ -170,7 +180,7 @@ export const createScenegraph = (): BBoxStore => {
     });
   };
 
-  return [scenegraph, { setBBox, createNode }];
+  return [scenegraph, { setBBox, createNode, createRef }];
 };
 
 export type BBoxStore = [
@@ -183,7 +193,21 @@ export type BBoxStore = [
       transform?: Transform
     ) => void;
     createNode: (id: string) => void;
+    createRef: (id: string, refId: string) => void;
   }
 ];
 
 export const BBoxContext = createContext<BBoxStore | null>(null);
+
+export const useScenegraph = (): [
+  get: { [key: string]: ScenegraphNode },
+  set: (
+    id: string,
+    bbox: Partial<BBox>,
+    owner: string,
+    transform?: Transform
+  ) => void
+] => {
+  const [scenegraph, { setBBox }] = useContext(BBoxContext)!;
+  return [scenegraph, setBBox];
+};

@@ -1,4 +1,9 @@
-import React, { useEffect, useContext, PropsWithChildren } from "react";
+import React, {
+  useEffect,
+  useContext,
+  PropsWithChildren,
+  useMemo,
+} from "react";
 // import { BBox, BBoxContext, BBoxStore, ScenegraphNode } from "./bboxStore";
 // import { toJS, trace } from "mobx";
 // import { observer } from "mobx-react-lite";
@@ -6,10 +11,12 @@ import { BBox, BBoxContext, Transform } from "./solidBBoxStore";
 import { observer } from "mobx-react-lite";
 import { withSolid } from "./ReactSolidState";
 
+export type Id = string;
+
 export type LayoutProps = PropsWithChildren<{
-  id: string;
+  id: Id;
   bbox?: Partial<BBox>;
-  layout: () => {
+  layout: (childIds: Id[]) => {
     bbox: Partial<BBox>;
     transform: Transform;
   };
@@ -38,8 +45,18 @@ export const Layout: React.FC<LayoutProps> = withSolid((props) => {
 
   //   // TODO: probably have to cleanup ownership here...
   // }, [layout, bboxStore, id]);
+
+  const childIds = useMemo(
+    () =>
+      React.Children.map(
+        children,
+        (child) => (child as React.ReactElement<any>).props.id
+      ) ?? [],
+    [children]
+  );
+
   useEffect(() => {
-    const { bbox, transform } = layout();
+    const { bbox, transform } = layout(childIds);
     // bboxStore?.setBbox(id, newBbox, id);
 
     // if (!bboxStore?.has(id)) {
@@ -53,7 +70,7 @@ export const Layout: React.FC<LayoutProps> = withSolid((props) => {
     setBBox(id, bbox, id, transform);
 
     // TODO: probably have to cleanup ownership here...
-  }, [layout, id, scenegraph, setBBox, createNode]);
+  }, [layout, id, scenegraph, setBBox, createNode, childIds]);
 
   const Paint = paint;
 
