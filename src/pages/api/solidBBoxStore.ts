@@ -83,7 +83,7 @@ export const createScenegraph = (): BBoxStore => {
   ) => {
     setScenegraph(id, (node: ScenegraphNode) => {
       if (
-        bbox.left &&
+        bbox.left !== undefined &&
         node.bboxOwners.left !== undefined &&
         node.bboxOwners.left !== owner
       ) {
@@ -91,7 +91,7 @@ export const createScenegraph = (): BBoxStore => {
           `${owner} tried to set ${id}'s left to ${bbox.left} but it was already set by ${node.bboxOwners.left}. Only one component can set a bbox property.`
         );
       } else if (
-        bbox.top &&
+        bbox.top !== undefined &&
         node.bboxOwners.top !== undefined &&
         node.bboxOwners.top !== owner
       ) {
@@ -99,7 +99,7 @@ export const createScenegraph = (): BBoxStore => {
           `${owner} tried to set ${id}'s top to ${bbox.top} but it was already set by ${node.bboxOwners.top}. Only one component can set a bbox property.`
         );
       } else if (
-        bbox.width &&
+        bbox.width !== undefined &&
         node.bboxOwners.width !== undefined &&
         node.bboxOwners.width !== owner
       ) {
@@ -107,7 +107,7 @@ export const createScenegraph = (): BBoxStore => {
           `${owner} tried to set ${id}'s width to ${bbox.width} but it was already set by ${node.bboxOwners.width}. Only one component can set a bbox property.`
         );
       } else if (
-        bbox.height &&
+        bbox.height !== undefined &&
         node.bboxOwners.height !== undefined &&
         node.bboxOwners.height !== owner
       ) {
@@ -115,7 +115,7 @@ export const createScenegraph = (): BBoxStore => {
           `${owner} tried to set ${id}'s height to ${bbox.height} but it was already set by ${node.bboxOwners.height}. Only one component can set a bbox property.`
         );
       } else if (
-        transform?.translate.x &&
+        transform?.translate.x !== undefined &&
         node.transformOwners.translate.x !== undefined &&
         node.transformOwners.translate.x !== owner
       ) {
@@ -123,7 +123,7 @@ export const createScenegraph = (): BBoxStore => {
           `${owner} tried to set ${id}'s translate.x to ${transform.translate.x} but it was already set by ${node.transformOwners.translate.x}. Only one component can set a transform property.`
         );
       } else if (
-        transform?.translate.y &&
+        transform?.translate.y !== undefined &&
         node.transformOwners.translate.y !== undefined &&
         node.transformOwners.translate.y !== owner
       ) {
@@ -140,10 +140,15 @@ export const createScenegraph = (): BBoxStore => {
         ...(bbox.height ? { height: owner } : {}),
       };
 
-      const newTransformOwners = {
-        ...node.transformOwners,
-        ...(transform?.translate.x ? { x: owner } : {}),
-        ...(transform?.translate.y ? { y: owner } : {}),
+      const newTransformOwners: TransformOwners = {
+        translate: {
+          x:
+            node.transformOwners.translate.x ??
+            (transform?.translate.x ? owner : undefined),
+          y:
+            node.transformOwners.translate.y ??
+            (transform?.translate.y ? owner : undefined),
+        },
       };
 
       // merge currentBbox and bbox, but don't overwrite currentBbox values with undefined

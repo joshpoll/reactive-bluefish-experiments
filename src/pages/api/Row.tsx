@@ -16,7 +16,7 @@ export type RowProps = {
 };
 
 export const Row: React.FC<RowProps> = (props) => {
-  const { x = 0, y = 0, spacing, horizontal, children, id } = props;
+  const { x, y, spacing, horizontal, children, id } = props;
   const [scenegraph, { setBBox }] = useContext(BBoxContext)!;
 
   // if (!bboxStore) {

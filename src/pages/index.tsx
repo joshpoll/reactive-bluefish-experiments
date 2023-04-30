@@ -68,6 +68,7 @@ const RowTest = ({
 export default function Home() {
   const [spacing, setSpacing] = useState(10);
   const [horizontal, setHorizontal] = useState(true);
+  const [width, setWidth] = useState(50);
 
   const [xPos, setXPos] = useState(10);
 
@@ -87,7 +88,7 @@ export default function Home() {
         <RowTest spacing={spacing} horizontal={horizontal} />
         <Bluefish width={1000} height={180}>
           <Row id="outerRow" x={50} spacing={spacing * 2}>
-            <Rect id="innerRect1" width={50} height={50} fill="magenta" />
+            <Rect id="innerRect1" width={width} height={50} fill="magenta" />
             <Row id="innerRow" spacing={spacing}>
               <Rect id="innerRect2" width={50} height={50} fill="blue" />
               <Rect id="innerRect3" width={50} height={50} fill="green" />
@@ -117,6 +118,13 @@ export default function Home() {
         onChange={() => {
           setHorizontal((prev) => !prev);
         }}
+      />
+      <input
+        type="range"
+        min="20"
+        max="100"
+        value={width}
+        onInput={(e) => setWidth(+e.currentTarget.value)}
       />
     </main>
   );
