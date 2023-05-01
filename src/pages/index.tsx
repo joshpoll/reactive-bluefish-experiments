@@ -6,6 +6,7 @@ import { Bluefish } from "./api/Bluefish";
 import { Row } from "./api/Row";
 import { Rect } from "./api/Rect";
 import { useState } from "react";
+import { Group } from "./api/Group";
 
 // const todoStore = new TodoStore();
 
@@ -87,15 +88,25 @@ export default function Home() {
         </Bluefish>
         <RowTest spacing={spacing} horizontal={horizontal} />
         <Bluefish width={1000} height={180}>
-          <Row id="outerRow" x={50} spacing={spacing * 2}>
-            <Rect id="innerRect1" width={width} height={50} fill="magenta" />
-            <Row id="innerRow" spacing={spacing}>
-              <Rect id="innerRect2" width={50} height={50} fill="blue" />
-              <Rect id="innerRect3" width={50} height={50} fill="green" />
-              <Rect id="innerRect4" width={50} height={50} fill="yellow" />
+          <Group id="group">
+            <Row id="outerRow" x={50} spacing={spacing * 2}>
+              <Rect id="innerRect1" width={width} height={50} fill="magenta" />
+              <Row id="innerRow" spacing={spacing}>
+                <Rect id="innerRect2" width={50} height={50} fill="blue" />
+                <Rect id="innerRect3" width={50} height={50} fill="green" />
+                <Rect id="innerRect4" width={50} height={50} fill="yellow" />
+              </Row>
+              <Rect id="innerRect5" width={50} height={50} fill="purple" />
             </Row>
-            <Rect id="innerRect5" width={50} height={50} fill="purple" />
-          </Row>
+            <Rect
+              id="singleRect"
+              x={xPos}
+              y={20}
+              width={50}
+              height={50}
+              fill="red"
+            />
+          </Group>
         </Bluefish>
       </div>
       <input
