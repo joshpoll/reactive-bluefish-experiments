@@ -42,19 +42,13 @@ export const Rect: React.FC<RectProps> = (props) => {
   const paint = useCallback(
     ({ bbox, transform }: { bbox: BBox; transform: Transform }) => {
       return (
-        <g
-          transform={`translate(${transform.translate.x ?? 0}, ${
-            transform.translate.y ?? 0
-          })`}
-        >
-          <rect
-            x={bbox.left}
-            y={bbox.top}
-            width={bbox.width}
-            height={bbox.height}
-            fill={fill}
-          />
-        </g>
+        <rect
+          x={(bbox.left ?? 0) + (transform.translate.x ?? 0)}
+          y={(bbox.top ?? 0) + (transform.translate.y ?? 0)}
+          width={bbox.width}
+          height={bbox.height}
+          fill={fill}
+        />
       );
     },
     [fill]

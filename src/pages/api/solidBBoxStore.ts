@@ -68,6 +68,9 @@ export const createScenegraph = (): BBoxStore => {
     [key: string]: ScenegraphNode;
   }>({});
 
+  // TODO: use a Proxy for each object to make objects appear as simply left, right, top, bottom, etc. even though
+  // they are composed of internal dimensions and transform.
+
   const createNode = (id: string) => {
     setScenegraph(id, {
       bbox: {},
@@ -164,12 +167,14 @@ export const createScenegraph = (): BBoxStore => {
       // merge currentBbox and bbox, but don't overwrite currentBbox values with undefined
       const newBBox = mergeObjects(node.bbox, bbox);
 
-      const newTransform = mergeObjects(
-        node.transform,
-        transform ?? { translate: {} }
-      ) as Transform;
+      const newTranslate = mergeObjects(
+        node.transform.translate,
+        transform?.translate ?? {}
+      );
 
-      // console.log("setBBox", id, bbox, owner, newBBox, newBBoxOwners);
+      const newTransform = {
+        translate: newTranslate,
+      };
 
       return {
         bbox: newBBox,

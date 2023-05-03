@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import { TodoStore } from "./api/TodoStore";
-import { ObservableTodoStore } from "./api/ObservableTodoStore";
 import { Bluefish } from "./api/Bluefish";
 import { Row } from "./api/Row";
 import { Rect } from "./api/Rect";
@@ -24,14 +23,6 @@ import { Group } from "./api/Group";
 
 // todoStore.todos[0].task = "grok MobX tutorial";
 // console.log(todoStore.report());
-
-const todoStore = new ObservableTodoStore();
-
-todoStore.addTodo("read MobX tutorial");
-todoStore.addTodo("try MobX");
-todoStore.todos[0].completed = true;
-todoStore.todos[1].task = "try MobX in own project";
-todoStore.todos[0].task = "grok MobX tutorial";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -96,7 +87,19 @@ export default function Home() {
                 <Rect id="innerRect3" width={50} height={50} fill="green" />
                 <Rect id="innerRect4" width={50} height={50} fill="yellow" />
               </Row>
-              <Rect id="innerRect5" width={50} height={50} fill="purple" />
+              {/* <Rect id="innerRect5" width={50} height={50} fill="purple" />
+              <Rect id="innerRect6" width={50} height={50} fill="purple" />
+              <Rect id="innerRect7" width={50} height={50} fill="purple" />
+              <Rect id="innerRect8" width={50} height={50} fill="purple" /> */}
+              {Array.from({ length: 1000 }).map((_, i) => (
+                <Rect
+                  key={i}
+                  id={`rect${i}`}
+                  width={50}
+                  height={50}
+                  fill={i % 3 === 0 ? "red" : i % 3 === 1 ? "blue" : "green"}
+                />
+              ))}
             </Row>
             <Rect
               id="singleRect"

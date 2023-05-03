@@ -15,6 +15,7 @@
     "autoprefixer": "10.4.14",
     "eslint": "8.38.0",
     "eslint-config-next": "13.3.0",
+    "lodash": "^4.17.21",
     "mobx": "^6.9.0",
     "mobx-react-lite": "^3.4.3",
     "next": "13.3.0",
@@ -24,5 +25,8 @@
     "solid-js": "^1.7.3",
     "tailwindcss": "3.3.1",
     "typescript": "5.0.4"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.194"
   }
 }
