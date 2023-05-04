@@ -35,7 +35,7 @@ export const Row: React.FC<RowProps> = (props) => {
 
   const layout = useCallback(
     (childIds: Id[]) => {
-      console.time("layout");
+      // console.time("layout");
       // const childIds =
       //   React.Children.map(
       //     children,
@@ -87,7 +87,7 @@ export const Row: React.FC<RowProps> = (props) => {
       const height = Math.max(
         ...childIds.map((childId) => scenegraph[childId]?.bbox.height ?? 0)
       );
-      console.timeEnd("layout");
+      // console.timeEnd("layout");
 
       return {
         bbox: {

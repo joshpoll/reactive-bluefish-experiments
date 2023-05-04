@@ -100,49 +100,55 @@ export const createScenegraph = (): BBoxStore => {
         node.bboxOwners.left !== undefined &&
         node.bboxOwners.left !== owner
       ) {
-        throw new Error(
-          `${owner} tried to set ${id}'s left to ${bbox.left} but it was already set by ${node.bboxOwners.left}. Only one component can set a bbox property.`
+        console.error(
+          `${owner} tried to set ${id}'s left to ${bbox.left} but it was already set by ${node.bboxOwners.left}. Only one component can set a bbox property. We skipped this update.`
         );
+        return node;
       } else if (
         bbox.top !== undefined &&
         node.bboxOwners.top !== undefined &&
         node.bboxOwners.top !== owner
       ) {
-        throw new Error(
-          `${owner} tried to set ${id}'s top to ${bbox.top} but it was already set by ${node.bboxOwners.top}. Only one component can set a bbox property.`
+        console.error(
+          `${owner} tried to set ${id}'s top to ${bbox.top} but it was already set by ${node.bboxOwners.top}. Only one component can set a bbox property. We skipped this update.`
         );
+        return node;
       } else if (
         bbox.width !== undefined &&
         node.bboxOwners.width !== undefined &&
         node.bboxOwners.width !== owner
       ) {
-        throw new Error(
-          `${owner} tried to set ${id}'s width to ${bbox.width} but it was already set by ${node.bboxOwners.width}. Only one component can set a bbox property.`
+        console.error(
+          `${owner} tried to set ${id}'s width to ${bbox.width} but it was already set by ${node.bboxOwners.width}. Only one component can set a bbox property. We skipped this update.`
         );
+        return node;
       } else if (
         bbox.height !== undefined &&
         node.bboxOwners.height !== undefined &&
         node.bboxOwners.height !== owner
       ) {
-        throw new Error(
-          `${owner} tried to set ${id}'s height to ${bbox.height} but it was already set by ${node.bboxOwners.height}. Only one component can set a bbox property.`
+        console.error(
+          `${owner} tried to set ${id}'s height to ${bbox.height} but it was already set by ${node.bboxOwners.height}. Only one component can set a bbox property. We skipped this update.`
         );
+        return node;
       } else if (
         transform?.translate.x !== undefined &&
         node.transformOwners.translate.x !== undefined &&
         node.transformOwners.translate.x !== owner
       ) {
-        throw new Error(
-          `${owner} tried to set ${id}'s translate.x to ${transform.translate.x} but it was already set by ${node.transformOwners.translate.x}. Only one component can set a transform property.`
+        console.error(
+          `${owner} tried to set ${id}'s translate.x to ${transform.translate.x} but it was already set by ${node.transformOwners.translate.x}. Only one component can set a transform property. We skipped this update.`
         );
+        return node;
       } else if (
         transform?.translate.y !== undefined &&
         node.transformOwners.translate.y !== undefined &&
         node.transformOwners.translate.y !== owner
       ) {
-        throw new Error(
-          `${owner} tried to set ${id}'s translate.y to ${transform.translate.y} but it was already set by ${node.transformOwners.translate.y}. Only one component can set a transform property.`
+        console.error(
+          `${owner} tried to set ${id}'s translate.y to ${transform.translate.y} but it was already set by ${node.transformOwners.translate.y}. Only one component can set a transform property. We skipped this update.`
         );
+        return node;
       }
 
       const newBBoxOwners = {

@@ -81,7 +81,13 @@ export default function Home() {
         <Bluefish width={1000} height={180}>
           <Group id="group">
             <Row id="outerRow" x={50} spacing={spacing * 2}>
-              <Rect id="innerRect1" width={width} height={50} fill="magenta" />
+              <Rect
+                // x={500}
+                id="innerRect1"
+                width={width}
+                height={50}
+                fill="magenta"
+              />
               <Row id="innerRow" spacing={spacing}>
                 <Rect id="innerRect2" width={50} height={50} fill="blue" />
                 <Rect id="innerRect3" width={50} height={50} fill="green" />
