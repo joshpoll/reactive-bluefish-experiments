@@ -134,6 +134,7 @@ export const createScenegraph = (): BBoxStore => {
       // if left and translate.x are both owned by us, then set left to the input value and set
       // translate.x to 0.
       // if left is owned by someone else, and translate.x is owned by us, then set translate.x
+
       if (
         bbox.left !== undefined &&
         node.transformOwners.translate.x !== undefined &&
@@ -172,7 +173,7 @@ export const createScenegraph = (): BBoxStore => {
           node.bbox.left !== undefined &&
           node.transform.translate.x === undefined
         ) {
-          proposedTransform.translate.x = node.bbox.left - bbox.left;
+          proposedTransform.translate.x = bbox.left - node.bbox.left;
         }
       }
 
@@ -187,14 +188,18 @@ export const createScenegraph = (): BBoxStore => {
           node.bbox.top !== undefined &&
           node.transform.translate.y === undefined
         ) {
-          proposedTransform.translate.y = node.bbox.top - bbox.top;
+          proposedTransform.translate.y = bbox.top - node.bbox.top;
         }
       }
 
       const newBBoxOwners = {
         ...node.bboxOwners,
-        ...(bbox.left ? { left: owner } : {}),
-        ...(bbox.top ? { top: owner } : {}),
+        ...(bbox.left !== undefined && node.bboxOwners.left === undefined
+          ? { left: owner }
+          : {}),
+        ...(bbox.top !== undefined && node.bboxOwners.top === undefined
+          ? { top: owner }
+          : {}),
         // ...(bbox.width ? { width: owner } : {}),
         // ...(bbox.height ? { height: owner } : {}),
       };
@@ -202,8 +207,11 @@ export const createScenegraph = (): BBoxStore => {
       const newTransformOwners: TransformOwners = {
         translate: {
           x:
-            node.transformOwners.translate.x ?? (bbox.left ? owner : undefined),
-          y: node.transformOwners.translate.y ?? (bbox.top ? owner : undefined),
+            node.transformOwners.translate.x ??
+            (bbox.left !== undefined ? owner : undefined),
+          y:
+            node.transformOwners.translate.y ??
+            (bbox.top !== undefined ? owner : undefined),
         },
       };
 
@@ -292,20 +300,20 @@ export const createScenegraph = (): BBoxStore => {
 
       const newBBoxOwners = {
         ...node.bboxOwners,
-        ...(bbox.left ? { left: owner } : {}),
-        ...(bbox.top ? { top: owner } : {}),
-        ...(bbox.width ? { width: owner } : {}),
-        ...(bbox.height ? { height: owner } : {}),
+        ...(bbox.left !== undefined ? { left: owner } : {}),
+        ...(bbox.top !== undefined ? { top: owner } : {}),
+        ...(bbox.width !== undefined ? { width: owner } : {}),
+        ...(bbox.height !== undefined ? { height: owner } : {}),
       };
 
       const newTransformOwners: TransformOwners = {
         translate: {
           x:
             node.transformOwners.translate.x ??
-            (transform?.translate.x ? owner : undefined),
+            (transform?.translate.x !== undefined ? owner : undefined),
           y:
             node.transformOwners.translate.y ??
-            (transform?.translate.y ? owner : undefined),
+            (transform?.translate.y !== undefined ? owner : undefined),
         },
       };
 

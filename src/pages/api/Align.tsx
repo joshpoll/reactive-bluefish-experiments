@@ -259,12 +259,11 @@ export const Align: React.FC<AlignProps> = (props) => {
           if (width === undefined) {
             continue;
           }
-          console.log(
-            "left",
-            horizontalValue - width / 2,
-            horizontalValue,
-            width
-          );
+          console.log("left", {
+            center: horizontalValue - width / 2,
+            value: horizontalValue,
+            width: width,
+          });
           setSmartBBox(placeable!, { left: horizontalValue - width / 2 }, id);
         } else if (horizontalAlignment === "right") {
           // placeable!.right = horizontalValue;
@@ -312,6 +311,7 @@ export const Align: React.FC<AlignProps> = (props) => {
       // const height =
       //   bottom === undefined || top === undefined ? undefined : bottom - top;
 
+      // TODO: this needs to take transforms into account...
       const left = Math.min(
         ...childIds.map((childId) => scenegraph[childId]?.bbox.left ?? 0)
       );

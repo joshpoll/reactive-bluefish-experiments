@@ -68,7 +68,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Bluefish width={240} height={180}>
+        {/* <Bluefish width={240} height={180}>
           <Rect
             id="singleRect"
             x={xPos}
@@ -77,9 +77,9 @@ export default function Home() {
             height={50}
             fill="red"
           />
-        </Bluefish>
-        <RowTest spacing={spacing} horizontal={horizontal} />
-        <Bluefish width={1000} height={180}>
+        </Bluefish> */}
+        {/* <RowTest spacing={spacing} horizontal={horizontal} /> */}
+        {/* <Bluefish width={1000} height={180}>
           <Group id="group">
             <Row id="outerRow" x={50} spacing={spacing * 2}>
               <Rect
@@ -94,10 +94,6 @@ export default function Home() {
                 <Rect id="innerRect3" width={50} height={50} fill="green" />
                 <Rect id="innerRect4" width={50} height={50} fill="yellow" />
               </Row>
-              {/* <Rect id="innerRect5" width={50} height={50} fill="purple" />
-              <Rect id="innerRect6" width={50} height={50} fill="purple" />
-              <Rect id="innerRect7" width={50} height={50} fill="purple" />
-              <Rect id="innerRect8" width={50} height={50} fill="purple" /> */}
               {Array.from({ length: 1000 }).map((_, i) => (
                 <Rect
                   key={i}
@@ -117,11 +113,11 @@ export default function Home() {
               fill="red"
             />
           </Group>
-        </Bluefish>
+        </Bluefish> */}
         {/* Alignment Tests */}
         <Bluefish width={1000} height={180}>
-          <Align id="align1" alignment="topCenter">
-            <Rect id="innerRect1" width={75} height={200} fill="blue" />
+          <Align id="align1" alignment="centerLeft">
+            <Rect id="innerRect1" width={100} height={200} fill="blue" />
             <Rect id="innerRect2" width={50} height={50} fill="green" />
           </Align>
         </Bluefish>
