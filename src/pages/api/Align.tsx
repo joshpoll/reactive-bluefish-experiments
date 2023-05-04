@@ -114,21 +114,7 @@ type AlignProps = PropsWithChildren<{
 
 export const Align: React.FC<AlignProps> = (props) => {
   const { children, id } = props;
-  // const [scenegraph, { setBBox }] = useContext(BBoxContext)!;
   const [scenegraph, setNode, getBBox, setSmartBBox] = useScenegraph();
-
-  // if (!bboxStore) {
-  //   throw new Error("BBoxContext is not provided");
-  // }
-
-  // const childIds = useMemo(
-  //   () =>
-  //     React.Children.map(
-  //       children,
-  //       (child) => (child as React.ReactElement<any>).props.id
-  //     ) ?? [],
-  //   [children]
-  // );
 
   const layout = useCallback(
     (childIds: Id[]) => {
@@ -279,43 +265,6 @@ export const Align: React.FC<AlignProps> = (props) => {
         }
       }
 
-      // for (const [placeable, alignment] of horizontalPlaceables) {
-      //   // console.log('[Align] placeable', placeable);
-      //   // console.log('[Align] alignment', alignment);
-      //   const [verticalAlignment, horizontalAlignment] = alignment!;
-      //   if (horizontalAlignment === "left") {
-      //     placeable!.left = horizontalValue;
-      //   } else if (horizontalAlignment === "center") {
-      //     if (placeable!.width === undefined) {
-      //       continue;
-      //     }
-      //     placeable!.left = horizontalValue - placeable!.width / 2;
-      //   } else if (horizontalAlignment === "right") {
-      //     placeable!.right = horizontalValue;
-      //   }
-      // }
-
-      // left is the minimimum of the lefts of all placeables. however, if any left is undefined,
-      // short circuit and return undefined.
-      // const left = _.map(placeables, "left").some((l) => l === undefined)
-      //   ? undefined
-      //   : _.min(_.map(placeables, "left"));
-      // const right = _.map(placeables, "right").some((r) => r === undefined)
-      //   ? undefined
-      //   : _.max(_.map(placeables, "right"));
-      // const top = _.map(placeables, "top").some((t) => t === undefined)
-      //   ? undefined
-      //   : _.min(_.map(placeables, "top"));
-      // const bottom = _.map(placeables, "bottom").some((b) => b === undefined)
-      //   ? undefined
-      //   : _.max(_.map(placeables, "bottom"));
-
-      // const width =
-      //   right === undefined || left === undefined ? undefined : right - left;
-      // const height =
-      //   bottom === undefined || top === undefined ? undefined : bottom - top;
-
-      // TODO: this needs to take transforms into account...
       const left = Math.min(
         ...childIds.map((childId) => getBBox(childId).left ?? 0)
       );
@@ -346,24 +295,11 @@ export const Align: React.FC<AlignProps> = (props) => {
             y: props.y !== undefined ? props.y - top : undefined,
           },
         },
-        bbox: {
-          left,
-          top,
-          right,
-          bottom,
-          width,
-          height,
-        },
+        bbox: { left, top, right, bottom, width, height },
       };
     },
     [getBBox, id, props.alignment, props.x, props.y, scenegraph, setSmartBBox]
   );
-
-  // useEffect(() => {
-  //   layout();
-  // }, [layout]);
-
-  // return <>{children}</>;
 
   const paint = useCallback(
     ({
