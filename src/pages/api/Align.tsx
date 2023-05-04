@@ -113,7 +113,7 @@ type AlignProps = PropsWithChildren<{
 }>;
 
 export const Align: React.FC<AlignProps> = (props) => {
-  const { x, y, children, id } = props;
+  const { children, id } = props;
   // const [scenegraph, { setBBox }] = useContext(BBoxContext)!;
   const [scenegraph, setNode, getBBox, setSmartBBox] = useScenegraph();
 
@@ -207,7 +207,6 @@ export const Align: React.FC<AlignProps> = (props) => {
             if (left === undefined || width === undefined) {
               return [placeable, undefined];
             }
-            console.log("left", left, "width", width);
             return [placeable, left + width / 2];
           } else if (horizontalAlignment === "right") {
             // return getBBox(placeable!).right;
@@ -225,8 +224,6 @@ export const Align: React.FC<AlignProps> = (props) => {
             value !== undefined
         );
 
-      console.log("horizontal array", horizontalValueArr);
-
       const horizontalValue =
         horizontalValueArr.length === 0
           ? 0
@@ -238,7 +235,6 @@ export const Align: React.FC<AlignProps> = (props) => {
           scenegraph[placeable!].transformOwners.translate.y !== id
         )
           continue;
-        console.log("vertical placement for", placeable);
         const [verticalAlignment, horizontalAlignment] = alignment!;
         if (verticalAlignment === "top") {
           setSmartBBox(placeable!, { top: verticalValue }, id);
@@ -272,11 +268,6 @@ export const Align: React.FC<AlignProps> = (props) => {
           if (width === undefined) {
             continue;
           }
-          console.log("left", {
-            center: horizontalValue - width / 2,
-            value: horizontalValue,
-            width: width,
-          });
           setSmartBBox(placeable!, { left: horizontalValue - width / 2 }, id);
         } else if (horizontalAlignment === "right") {
           // placeable!.right = horizontalValue;
@@ -326,24 +317,22 @@ export const Align: React.FC<AlignProps> = (props) => {
 
       // TODO: this needs to take transforms into account...
       const left = Math.min(
-        ...childIds.map((childId) => scenegraph[childId]?.bbox.left ?? 0)
+        ...childIds.map((childId) => getBBox(childId).left ?? 0)
       );
       const right = Math.max(
         ...childIds.map(
           (childId) =>
-            (scenegraph[childId]?.bbox.left ?? 0) +
-            (scenegraph[childId]?.bbox.width ?? 0)
+            (getBBox(childId).left ?? 0) + (getBBox(childId).width ?? 0)
         )
       );
 
       const top = Math.min(
-        ...childIds.map((childId) => scenegraph[childId]?.bbox.top ?? 0)
+        ...childIds.map((childId) => getBBox(childId).top ?? 0)
       );
       const bottom = Math.max(
         ...childIds.map(
           (childId) =>
-            (scenegraph[childId]?.bbox.top ?? 0) +
-            (scenegraph[childId]?.bbox.height ?? 0)
+            (getBBox(childId).top ?? 0) + (getBBox(childId).height ?? 0)
         )
       );
 
@@ -353,8 +342,8 @@ export const Align: React.FC<AlignProps> = (props) => {
       return {
         transform: {
           translate: {
-            //     x: props.x,
-            //     y: props.y,
+            x: props.x !== undefined ? props.x - left : undefined,
+            y: props.y !== undefined ? props.y - top : undefined,
           },
         },
         bbox: {
@@ -367,7 +356,7 @@ export const Align: React.FC<AlignProps> = (props) => {
         },
       };
     },
-    [getBBox, id, props.alignment, scenegraph, setSmartBBox]
+    [getBBox, id, props.alignment, props.x, props.y, scenegraph, setSmartBBox]
   );
 
   // useEffect(() => {

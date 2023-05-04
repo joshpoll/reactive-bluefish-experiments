@@ -69,8 +69,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        {/* <Bluefish width={240} height={180}>
+      {/* <Bluefish width={240} height={180}>
           <Rect
             id="singleRect"
             x={xPos}
@@ -80,8 +79,8 @@ export default function Home() {
             fill="red"
           />
         </Bluefish> */}
-        {/* <RowTest spacing={spacing} horizontal={horizontal} /> */}
-        {/* <Bluefish width={1000} height={180}>
+      {/* <RowTest spacing={spacing} horizontal={horizontal} /> */}
+      {/* <Bluefish width={1000} height={180}>
           <Group id="group">
             <Row id="outerRow" x={50} spacing={spacing * 2}>
               <Rect
@@ -116,14 +115,19 @@ export default function Home() {
             />
           </Group>
         </Bluefish> */}
-        {/* Alignment Tests */}
-        <Bluefish width={1000} height={180}>
-          <Align id="align1" alignment={alignment}>
-            <Rect id="innerRect1" x={50} width={100} height={200} fill="blue" />
-            <Rect id="innerRect2" width={50} height={50} fill="green" />
-          </Align>
-        </Bluefish>
-      </div>
+      {/* Alignment Tests */}
+      <Bluefish width={1000} height={180}>
+        <Align x={0} y={0} id="align1" alignment={alignment}>
+          <Rect
+            id="innerRect1"
+            x={50}
+            width={100}
+            height={150}
+            fill="steelblue"
+          />
+          <Rect id="innerRect2" width={50} height={50} fill="lightgreen" />
+        </Align>
+      </Bluefish>
       {/* create a dropdown for picking the alignment */}
       <select
         value={alignment}
