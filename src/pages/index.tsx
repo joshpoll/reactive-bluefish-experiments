@@ -6,6 +6,7 @@ import { Row } from "./api/Row";
 import { Rect } from "./api/Rect";
 import { useState } from "react";
 import { Group } from "./api/Group";
+import { Align } from "./api/Align";
 
 // const todoStore = new TodoStore();
 
@@ -116,6 +117,13 @@ export default function Home() {
               fill="red"
             />
           </Group>
+        </Bluefish>
+        {/* Alignment Tests */}
+        <Bluefish width={1000} height={180}>
+          <Align id="align1" alignment="topCenter">
+            <Rect id="innerRect1" width={75} height={200} fill="blue" />
+            <Rect id="innerRect2" width={50} height={50} fill="green" />
+          </Align>
         </Bluefish>
       </div>
       <input

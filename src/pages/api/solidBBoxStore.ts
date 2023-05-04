@@ -88,6 +88,145 @@ export const createScenegraph = (): BBoxStore => {
     setScenegraph(id, scenegraph[refId]);
   };
 
+  const getBBox = (id: string) => {
+    return {
+      get left() {
+        const node = scenegraph[id];
+
+        if (
+          node.bbox.left === undefined ||
+          node.transform.translate.x === undefined
+        ) {
+          return undefined;
+        }
+
+        return node.bbox.left + node.transform.translate.x;
+      },
+      get top() {
+        const node = scenegraph[id];
+
+        if (
+          node.bbox.top === undefined ||
+          node.transform.translate.y === undefined
+        ) {
+          return undefined;
+        }
+
+        return node.bbox.top + node.transform.translate.y;
+      },
+      get width() {
+        return scenegraph[id].bbox.width;
+      },
+      get height() {
+        return scenegraph[id].bbox.height;
+      },
+    };
+  };
+
+  const setSmartBBox = (id: string, bbox: BBox, owner: string) => {
+    setScenegraph(id, (node: ScenegraphNode) => {
+      // if left and translate.x are both undefined, then set left to the input value and set
+      // translate.x to 0.
+      // if left is defined, and translate.x is undefined, then set translate.x to the difference
+      // between the input value and left.
+      // if both are defined, then check ownership. If there's an ownership conflict, then
+      // console.error and return
+      // if left and translate.x are both owned by us, then set left to the input value and set
+      // translate.x to 0.
+      // if left is owned by someone else, and translate.x is owned by us, then set translate.x
+      if (
+        bbox.left !== undefined &&
+        node.transformOwners.translate.x !== undefined &&
+        node.transformOwners.translate.x !== owner
+      ) {
+        console.error(
+          `${owner} tried to set ${id}'s left to ${bbox.left} but it was already set by ${node.transformOwners.translate.x}. Only one component can set a bbox property. We skipped this update.`
+        );
+        return node;
+      } else if (
+        bbox.top !== undefined &&
+        node.transformOwners.translate.y !== undefined &&
+        node.transformOwners.translate.y !== owner
+      ) {
+        console.error(
+          `${owner} tried to set ${id}'s top to ${bbox.top} but it was already set by ${node.transformOwners.translate.y}. Only one component can set a bbox property. We skipped this update.`
+        );
+        return node;
+      }
+      // TODO: there are a bunch of other cases to consider, but I don't think they'll come up just
+      // yet so we'll skip them...
+
+      const proposedBBox: BBox = {};
+      const proposedTransform: Transform = {
+        translate: {},
+      };
+
+      if (bbox.left !== undefined) {
+        if (
+          node.bbox.left === undefined &&
+          node.transform.translate.x === undefined
+        ) {
+          proposedBBox.left = bbox.left;
+          proposedTransform.translate.x = 0;
+        } else if (
+          node.bbox.left !== undefined &&
+          node.transform.translate.x === undefined
+        ) {
+          proposedTransform.translate.x = node.bbox.left - bbox.left;
+        }
+      }
+
+      if (bbox.top !== undefined) {
+        if (
+          node.bbox.top === undefined &&
+          node.transform.translate.y === undefined
+        ) {
+          proposedBBox.top = bbox.top;
+          proposedTransform.translate.y = 0;
+        } else if (
+          node.bbox.top !== undefined &&
+          node.transform.translate.y === undefined
+        ) {
+          proposedTransform.translate.y = node.bbox.top - bbox.top;
+        }
+      }
+
+      const newBBoxOwners = {
+        ...node.bboxOwners,
+        ...(bbox.left ? { left: owner } : {}),
+        ...(bbox.top ? { top: owner } : {}),
+        // ...(bbox.width ? { width: owner } : {}),
+        // ...(bbox.height ? { height: owner } : {}),
+      };
+
+      const newTransformOwners: TransformOwners = {
+        translate: {
+          x:
+            node.transformOwners.translate.x ?? (bbox.left ? owner : undefined),
+          y: node.transformOwners.translate.y ?? (bbox.top ? owner : undefined),
+        },
+      };
+
+      const newBBox = mergeObjects(node.bbox, proposedBBox);
+
+      const newTranslate = mergeObjects(
+        node.transform.translate,
+        proposedTransform.translate
+      );
+
+      const newTransform = {
+        translate: newTranslate,
+      };
+
+      return {
+        bbox: newBBox,
+        bboxOwners: newBBoxOwners,
+        transform: newTransform,
+        transformOwners: newTransformOwners,
+      };
+    });
+  };
+
   const setBBox = (
     id: string,
     bbox: Partial<BBox>,
@@ -191,12 +330,18 @@ export const createScenegraph = (): BBoxStore => {
     });
   };
 
-  return [scenegraph, { setBBox, createNode, createRef }];
+  return [
+    scenegraph,
+    { getBBox, setSmartBBox, setBBox, createNode, createRef },
+  ];
 };
 
 export type BBoxStore = [
   get: { [key: string]: ScenegraphNode },
   set: {
+    // TODO: move this out of set...
+    getBBox: (id: string) => BBox;
+    setSmartBBox: (id: string, bbox: BBox, owner: string) => void;
     setBBox: (
       id: string,
       bbox: Partial<BBox>,
@@ -217,8 +362,11 @@ export const useScenegraph = (): [
     bbox: Partial<BBox>,
     owner: string,
     transform?: Transform
-  ) => void
+  ) => void,
+  smartGet: (id: string) => BBox,
+  smartSet: (id: string, bbox: BBox, owner: string) => void
 ] => {
-  const [scenegraph, { setBBox }] = useContext(BBoxContext)!;
-  return [scenegraph, setBBox];
+  const [scenegraph, { setBBox, getBBox, setSmartBBox }] =
+    useContext(BBoxContext)!;
+  return [scenegraph, setBBox, getBBox, setSmartBBox];
 };
