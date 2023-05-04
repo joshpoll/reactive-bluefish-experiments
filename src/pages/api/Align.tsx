@@ -188,7 +188,7 @@ export const Align: React.FC<AlignProps> = (props) => {
         })
         .filter(
           ([placeable, value]) =>
-            scenegraph[placeable!].transformOwners.translate.y === id &&
+            scenegraph[placeable!].transformOwners.translate.y !== id &&
             value !== undefined
         );
 
@@ -221,9 +221,11 @@ export const Align: React.FC<AlignProps> = (props) => {
         })
         .filter(
           ([placeable, value]) =>
-            scenegraph[placeable!].transformOwners.translate.x === id &&
+            scenegraph[placeable!].transformOwners.translate.x !== id &&
             value !== undefined
         );
+
+      console.log("horizontal array", horizontalValueArr);
 
       const horizontalValue =
         horizontalValueArr.length === 0
@@ -231,6 +233,12 @@ export const Align: React.FC<AlignProps> = (props) => {
           : (horizontalValueArr[0][1] as number);
 
       for (const [placeable, alignment] of verticalPlaceables) {
+        if (
+          scenegraph[placeable!].transformOwners.translate.y !== undefined &&
+          scenegraph[placeable!].transformOwners.translate.y !== id
+        )
+          continue;
+        console.log("vertical placement for", placeable);
         const [verticalAlignment, horizontalAlignment] = alignment!;
         if (verticalAlignment === "top") {
           setSmartBBox(placeable!, { top: verticalValue }, id);
@@ -251,6 +259,11 @@ export const Align: React.FC<AlignProps> = (props) => {
       }
 
       for (const [placeable, alignment] of horizontalPlaceables) {
+        if (
+          scenegraph[placeable!].transformOwners.translate.x !== undefined &&
+          scenegraph[placeable!].transformOwners.translate.x !== id
+        )
+          continue;
         const [verticalAlignment, horizontalAlignment] = alignment!;
         if (horizontalAlignment === "left") {
           setSmartBBox(placeable!, { left: horizontalValue }, id);

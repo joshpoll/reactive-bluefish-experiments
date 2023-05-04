@@ -6,7 +6,7 @@ import { Row } from "./api/Row";
 import { Rect } from "./api/Rect";
 import { useState } from "react";
 import { Group } from "./api/Group";
-import { Align } from "./api/Align";
+import { Align, Alignment2D } from "./api/Align";
 
 // const todoStore = new TodoStore();
 
@@ -65,6 +65,8 @@ export default function Home() {
 
   const [xPos, setXPos] = useState(10);
 
+  const [alignment, setAlignment] = useState<Alignment2D>("center");
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
@@ -116,12 +118,27 @@ export default function Home() {
         </Bluefish> */}
         {/* Alignment Tests */}
         <Bluefish width={1000} height={180}>
-          <Align id="align1" alignment="centerLeft">
-            <Rect id="innerRect1" width={100} height={200} fill="blue" />
+          <Align id="align1" alignment={alignment}>
+            <Rect id="innerRect1" x={50} width={100} height={200} fill="blue" />
             <Rect id="innerRect2" width={50} height={50} fill="green" />
           </Align>
         </Bluefish>
       </div>
+      {/* create a dropdown for picking the alignment */}
+      <select
+        value={alignment}
+        onChange={(e) => setAlignment(e.target.value as Alignment2D)}
+      >
+        <option value="topLeft">Top Left</option>
+        <option value="topCenter">Top Center</option>
+        <option value="topRight">Top Right</option>
+        <option value="centerLeft">Center Left</option>
+        <option value="center">Center</option>
+        <option value="centerRight">Center Right</option>
+        <option value="bottomLeft">Bottom Left</option>
+        <option value="bottomCenter">Bottom Center</option>
+        <option value="bottomRight">Bottom Right</option>
+      </select>
       <input
         type="range"
         min="0"

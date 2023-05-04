@@ -141,7 +141,13 @@ export const createScenegraph = (): BBoxStore => {
         node.transformOwners.translate.x !== owner
       ) {
         console.error(
-          `${owner} tried to set ${id}'s left to ${bbox.left} but it was already set by ${node.transformOwners.translate.x}. Only one component can set a bbox property. We skipped this update.`
+          `${owner} tried to set ${id}'s left to ${
+            bbox.left
+          } but it was already set to ${
+            (node.bbox.left ?? 0) + (node.transform.translate.x ?? 0)
+          } by ${
+            node.transformOwners.translate.x
+          }. Only one component can set a bbox property. We skipped this update.`
         );
         return node;
       } else if (
@@ -150,7 +156,13 @@ export const createScenegraph = (): BBoxStore => {
         node.transformOwners.translate.y !== owner
       ) {
         console.error(
-          `${owner} tried to set ${id}'s top to ${bbox.top} but it was already set by ${node.transformOwners.translate.y}. Only one component can set a bbox property. We skipped this update.`
+          `${owner} tried to set ${id}'s top to ${
+            bbox.top
+          } but it was already set to ${
+            (node.bbox.top ?? 0) + (node.transform.translate.y ?? 0)
+          } by ${
+            node.transformOwners.translate.y
+          }. Only one component can set a bbox property. We skipped this update.`
         );
         return node;
       }
@@ -163,32 +175,20 @@ export const createScenegraph = (): BBoxStore => {
       };
 
       if (bbox.left !== undefined) {
-        if (
-          node.bbox.left === undefined &&
-          node.transform.translate.x === undefined
-        ) {
+        if (node.bboxOwners.left === id) {
           proposedBBox.left = bbox.left;
           proposedTransform.translate.x = 0;
-        } else if (
-          node.bbox.left !== undefined &&
-          node.transform.translate.x === undefined
-        ) {
-          proposedTransform.translate.x = bbox.left - node.bbox.left;
+        } else if (node.transformOwners.translate.x === id) {
+          proposedTransform.translate.x = bbox.left - node.bbox.left!;
         }
       }
 
       if (bbox.top !== undefined) {
-        if (
-          node.bbox.top === undefined &&
-          node.transform.translate.y === undefined
-        ) {
+        if (node.bboxOwners.top === id) {
           proposedBBox.top = bbox.top;
           proposedTransform.translate.y = 0;
-        } else if (
-          node.bbox.top !== undefined &&
-          node.transform.translate.y === undefined
-        ) {
-          proposedTransform.translate.y = bbox.top - node.bbox.top;
+        } else if (node.transformOwners.translate.y === id) {
+          proposedTransform.translate.y = bbox.top - node.bbox.top!;
         }
       }
 
