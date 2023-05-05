@@ -1,17 +1,7 @@
-import React, {
-  useEffect,
-  useContext,
-  useCallback,
-  useMemo,
-  PropsWithChildren,
-} from "react";
-// import { observer } from "mobx-react-lite";
-// import { BBoxContext, BBoxStore } from "./bboxStore";
+import React, { useCallback, PropsWithChildren } from "react";
 import { Id, Layout } from "./Layout";
-import { BBox, BBoxContext, Transform, useScenegraph } from "./solidBBoxStore";
+import { BBox, Transform, useScenegraph } from "./solidBBoxStore";
 import _ from "lodash";
-// import { observer } from "mobx-react-lite";
-// import { action } from "mobx";
 
 export type Alignment2D =
   | "topLeft"
@@ -101,10 +91,6 @@ export const splitAlignment = (
   return [verticalAlignment, horizontalAlignment];
 };
 
-// type AlignProps =
-//   | { [K in Alignment2D]?: React.CElement<any, any> | React.CElement<any, any>[] }
-//   | { [K in Alignment1DHorizontal]?: React.CElement<any, any> | React.CElement<any, any>[] }
-//   | { [K in Alignment1DVertical]?: React.CElement<any, any> | React.CElement<any, any>[] };
 type AlignProps = PropsWithChildren<{
   id: Id;
   x?: number;
@@ -317,14 +303,6 @@ export const Align: React.FC<AlignProps> = (props) => {
         })`}
       >
         {children}
-        {/* <rect
-          x={bbox.left}
-          y={bbox.top}
-          width={bbox.width}
-          height={bbox.height}
-          fill="none"
-          stroke="magenta"
-        /> */}
       </g>
     ),
     []

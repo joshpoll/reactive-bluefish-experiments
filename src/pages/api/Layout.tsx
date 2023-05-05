@@ -4,9 +4,6 @@ import React, {
   PropsWithChildren,
   useMemo,
 } from "react";
-// import { BBox, BBoxContext, BBoxStore, ScenegraphNode } from "./bboxStore";
-// import { toJS, trace } from "mobx";
-// import { observer } from "mobx-react-lite";
 import {
   BBox,
   BBoxContext,

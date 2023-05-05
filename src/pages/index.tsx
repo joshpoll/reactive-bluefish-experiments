@@ -1,29 +1,11 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import { TodoStore } from "./api/TodoStore";
 import { Bluefish } from "./api/Bluefish";
 import { Row } from "./api/Row";
 import { Rect } from "./api/Rect";
 import { useState } from "react";
 import { Group } from "./api/Group";
 import { Align, Alignment2D } from "./api/Align";
-
-// const todoStore = new TodoStore();
-
-// todoStore.addTodo("read MobX tutorial");
-// console.log(todoStore.report());
-
-// todoStore.addTodo("try MobX");
-// console.log(todoStore.report());
-
-// todoStore.todos[0].completed = true;
-// console.log(todoStore.report());
-
-// todoStore.todos[1].task = "try MobX in own project";
-// console.log(todoStore.report());
-
-// todoStore.todos[0].task = "grok MobX tutorial";
-// console.log(todoStore.report());
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,10 +16,9 @@ const RowTest = ({
   spacing: number;
   horizontal: boolean;
 }) => {
-  // eslint-disable-next-line react/display-name
   return (
     <Bluefish width={500} height={180}>
-      <Row id={"row"} spacing={spacing} horizontal={horizontal}>
+      <Row id={"row"} spacing={spacing}>
         {Array.from({ length: 1000 }).map((_, i) => (
           <Rect
             key={i}

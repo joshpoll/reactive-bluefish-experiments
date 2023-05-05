@@ -90,8 +90,6 @@ export const createScenegraph = (): BBoxStore => {
 
     if (parentId !== null) {
       setScenegraph(parentId, (node: ScenegraphNode) => {
-        console.log("parentId", parentId, "node", node, "id", id);
-        // debugger;
         return {
           ...node,
           children: new Set([...Array.from(node.children), id]),

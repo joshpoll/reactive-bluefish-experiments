@@ -1,14 +1,6 @@
-import React, {
-  useContext,
-  createContext,
-  useEffect,
-  useCallback,
-} from "react";
-import { observer } from "mobx-react-lite";
+import React, { useCallback } from "react";
 import { Layout } from "./Layout";
-import { BBox, BBoxContext, BBoxStore } from "./bboxStore";
-import { trace } from "mobx";
-import { Transform } from "./solidBBoxStore";
+import { BBox, Transform } from "./solidBBoxStore";
 
 export type RectProps = {
   id: string;
