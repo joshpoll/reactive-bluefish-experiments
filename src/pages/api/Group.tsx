@@ -1,10 +1,6 @@
-import React, { useEffect, useContext, useCallback, useMemo } from "react";
-// import { observer } from "mobx-react-lite";
-// import { BBoxContext, BBoxStore } from "./bboxStore";
+import React, { useCallback } from "react";
 import { Id, Layout } from "./Layout";
-import { BBox, BBoxContext, Transform, useScenegraph } from "./solidBBoxStore";
-// import { observer } from "mobx-react-lite";
-// import { action } from "mobx";
+import { BBox, Transform, useScenegraph } from "./solidBBoxStore";
 
 export type GroupProps = {
   x?: number;
@@ -16,19 +12,6 @@ export type GroupProps = {
 export const Group: React.FC<GroupProps> = (props) => {
   const { x, y, children } = props;
   const [scenegraph] = useScenegraph();
-
-  // if (!bboxStore) {
-  //   throw new Error("BBoxContext is not provided");
-  // }
-
-  // const childIds = useMemo(
-  //   () =>
-  //     React.Children.map(
-  //       children,
-  //       (child) => (child as React.ReactElement<any>).props.id
-  //     ) ?? [],
-  //   [children]
-  // );
 
   const layout = useCallback(
     (childIds: Id[]) => {
@@ -75,12 +58,6 @@ export const Group: React.FC<GroupProps> = (props) => {
     [scenegraph, x, y]
   );
 
-  // useEffect(() => {
-  //   layout();
-  // }, [layout]);
-
-  // return <>{children}</>;
-
   const paint = useCallback(
     ({
       bbox,
@@ -97,14 +74,6 @@ export const Group: React.FC<GroupProps> = (props) => {
         })`}
       >
         {children}
-        {/* <rect
-          x={bbox.left}
-          y={bbox.top}
-          width={bbox.width}
-          height={bbox.height}
-          fill="none"
-          stroke="magenta"
-        /> */}
       </g>
     ),
     []
