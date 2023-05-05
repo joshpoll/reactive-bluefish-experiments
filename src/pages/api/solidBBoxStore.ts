@@ -57,7 +57,8 @@ export type ScenegraphNode = {
   transform: Transform;
   bboxOwners: BBoxOwners;
   transformOwners: TransformOwners;
-  // children?: string[];
+  worldTransform: Transform;
+  children: Set<string>;
   // parents?: string[];
   // layout?
   // paint?
@@ -71,7 +72,7 @@ export const createScenegraph = (): BBoxStore => {
   // TODO: use a Proxy for each object to make objects appear as simply left, right, top, bottom, etc. even though
   // they are composed of internal dimensions and transform.
 
-  const createNode = (id: string) => {
+  const createNode = (id: string, parentId: string | null) => {
     setScenegraph(id, {
       bbox: {},
       bboxOwners: {},
@@ -81,7 +82,22 @@ export const createScenegraph = (): BBoxStore => {
       transformOwners: {
         translate: {},
       },
+      worldTransform: {
+        translate: {},
+      },
+      children: new Set(),
     });
+
+    if (parentId !== null) {
+      setScenegraph(parentId, (node: ScenegraphNode) => {
+        console.log("parentId", parentId, "node", node, "id", id);
+        // debugger;
+        return {
+          ...node,
+          children: new Set([...Array.from(node.children), id]),
+        };
+      });
+    }
   };
 
   const createRef = (id: string, refId: string) => {
@@ -121,6 +137,61 @@ export const createScenegraph = (): BBoxStore => {
         return scenegraph[id].bbox.height;
       },
     };
+  };
+
+  // returns the new world transform and also updates the world transforms of its children
+  // TODO: hopefully I can nest calls to setScenegraph...
+  const updateWorldTransform = (
+    node: ScenegraphNode,
+    newTransform: Transform // our new transform
+  ): Transform => {
+    const diffTransform = {
+      translate: {
+        x: (newTransform.translate.x ?? 0) - (node.transform.translate.x ?? 0),
+        y: (newTransform.translate.y ?? 0) - (node.transform.translate.y ?? 0),
+      },
+    };
+
+    const newWorldTransform = {
+      translate: {
+        x: (node.worldTransform?.translate.x ?? 0) + diffTransform.translate.x,
+        y: (node.worldTransform?.translate.y ?? 0) + diffTransform.translate.y,
+      },
+    };
+
+    for (const child of Array.from(node.children)) {
+      setWorldTransform(child, newWorldTransform);
+    }
+
+    return newWorldTransform;
+  };
+
+  const setWorldTransform = (
+    id: string,
+    parentWorldTransform: Transform
+  ): void => {
+    setScenegraph(id, (node: ScenegraphNode) => {
+      // compose node's transform with parentWorldTransform
+      const newWorldTransform = {
+        translate: {
+          x:
+            (node.transform.translate.x ?? 0) +
+            (parentWorldTransform.translate.x ?? 0),
+          y:
+            (node.transform.translate.y ?? 0) +
+            (parentWorldTransform.translate.y ?? 0),
+        },
+      };
+
+      for (const child of Array.from(node.children)) {
+        setWorldTransform(child, newWorldTransform);
+      }
+
+      return {
+        ...node,
+        worldTransform: newWorldTransform,
+      };
+    });
   };
 
   const setSmartBBox = (id: string, bbox: BBox, owner: string) => {
@@ -226,11 +297,15 @@ export const createScenegraph = (): BBoxStore => {
         translate: newTranslate,
       };
 
+      const newWorldTransform = updateWorldTransform(node, newTransform);
+
       return {
         bbox: newBBox,
         bboxOwners: newBBoxOwners,
         transform: newTransform,
         transformOwners: newTransformOwners,
+        worldTransform: newWorldTransform,
+        children: node.children,
       };
     });
   };
@@ -329,11 +404,15 @@ export const createScenegraph = (): BBoxStore => {
         translate: newTranslate,
       };
 
+      const newWorldTransform = updateWorldTransform(node, newTransform);
+
       return {
         bbox: newBBox,
         bboxOwners: newBBoxOwners,
         transform: newTransform,
         transformOwners: newTransformOwners,
+        worldTransform: newWorldTransform,
+        children: node.children,
       };
     });
   };
@@ -356,7 +435,7 @@ export type BBoxStore = [
       owner: string,
       transform?: Transform
     ) => void;
-    createNode: (id: string) => void;
+    createNode: (id: string, parentId: string | null) => void;
     createRef: (id: string, refId: string) => void;
   }
 ];
@@ -378,3 +457,5 @@ export const useScenegraph = (): [
     useContext(BBoxContext)!;
   return [scenegraph, setBBox, getBBox, setSmartBBox];
 };
+
+export const ParentIDContext = createContext<string | null>(null);

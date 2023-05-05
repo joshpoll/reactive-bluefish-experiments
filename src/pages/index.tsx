@@ -80,41 +80,41 @@ export default function Home() {
           />
         </Bluefish> */}
       {/* <RowTest spacing={spacing} horizontal={horizontal} /> */}
-      {/* <Bluefish width={1000} height={180}>
-          <Group id="group">
-            <Row id="outerRow" x={50} spacing={spacing * 2}>
-              <Rect
-                // x={500}
-                id="innerRect1"
-                width={width}
-                height={50}
-                fill="magenta"
-              />
-              <Row id="innerRow" spacing={spacing}>
-                <Rect id="innerRect2" width={50} height={50} fill="blue" />
-                <Rect id="innerRect3" width={50} height={50} fill="green" />
-                <Rect id="innerRect4" width={50} height={50} fill="yellow" />
-              </Row>
-              {Array.from({ length: 1000 }).map((_, i) => (
-                <Rect
-                  key={i}
-                  id={`rect${i}`}
-                  width={50}
-                  height={50}
-                  fill={i % 3 === 0 ? "red" : i % 3 === 1 ? "blue" : "green"}
-                />
-              ))}
-            </Row>
+      <Bluefish width={1000} height={180}>
+        <Group id="group">
+          <Row id="outerRow" x={50} spacing={spacing * 2}>
             <Rect
-              id="singleRect"
-              x={xPos}
-              y={20}
-              width={50}
+              // x={500}
+              id="innerRect1"
+              width={width}
               height={50}
-              fill="red"
+              fill="magenta"
             />
-          </Group>
-        </Bluefish> */}
+            <Row id="innerRow" spacing={spacing}>
+              <Rect id="innerRect2" width={50} height={50} fill="blue" />
+              <Rect id="innerRect3" width={50} height={50} fill="green" />
+              <Rect id="innerRect4" width={50} height={50} fill="yellow" />
+            </Row>
+            {Array.from({ length: 1000 }).map((_, i) => (
+              <Rect
+                key={i}
+                id={`rect${i}`}
+                width={50}
+                height={50}
+                fill={i % 3 === 0 ? "red" : i % 3 === 1 ? "blue" : "green"}
+              />
+            ))}
+          </Row>
+          <Rect
+            id="singleRect"
+            x={xPos}
+            y={20}
+            width={50}
+            height={50}
+            fill="red"
+          />
+        </Group>
+      </Bluefish>
       {/* Alignment Tests */}
       <Bluefish width={1000} height={180}>
         <Align x={0} y={0} id="align1" alignment={alignment}>
