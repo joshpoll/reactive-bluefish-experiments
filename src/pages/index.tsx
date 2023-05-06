@@ -100,13 +100,13 @@ export default function Home() {
       <Bluefish width={1000} height={180}>
         <Align x={0} y={0} id="align1" alignment={alignment}>
           <Rect
-            id="innerRect1"
+            id="innerRect11"
             x={50}
             width={100}
             height={150}
             fill="steelblue"
           />
-          <Rect id="innerRect2" width={50} height={50} fill="lightgreen" />
+          <Rect id="innerRect21" width={50} height={50} fill="lightgreen" />
         </Align>
       </Bluefish>
       {/* create a dropdown for picking the alignment */}
