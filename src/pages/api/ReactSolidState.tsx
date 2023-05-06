@@ -16,6 +16,9 @@ import {
   createSignal as sSignal,
   onCleanup as sCleanup,
   createReaction,
+  EffectFunction,
+  NoInfer,
+  EffectOptions,
 } from "solid-js";
 
 function useForceUpdate() {
@@ -50,3 +53,53 @@ export function withSolid<P extends object>(
     return (component && useObserver(component)) || null;
   });
 }
+
+let inSolidEffect = false;
+function trackNesting<T extends readonly any[]>(args: T): T {
+  const fn = args[0] as (...args: readonly any[]) => void;
+  return [
+    function (...args: readonly any[]) {
+      const outside = inSolidEffect;
+      inSolidEffect = true;
+      const ret = fn(...args);
+      inSolidEffect = outside;
+      return ret;
+    },
+    ...args.slice(1),
+  ] as readonly any[] as T;
+}
+
+export function useEffect<Next>(
+  fn: EffectFunction<undefined | NoInfer<Next>, Next>
+): void;
+export function useEffect<Next, Init = Next>(
+  fn: EffectFunction<Init | Next, Next>,
+  value: Init,
+  options?: EffectOptions & {
+    render?: boolean;
+  }
+): void;
+export function useEffect<T>(
+  fn: (v: T | undefined) => T,
+  value?: T,
+  options?: { name?: string }
+) {
+  if (inSolidEffect) {
+    if (value === undefined) return sEffect(fn);
+    return sEffect(fn, value, options);
+  }
+  const dispose = rRef<() => void>();
+  rEffect(() => dispose.current, []);
+  if (!dispose.current) {
+    createRoot((disposer) => {
+      dispose.current = disposer;
+      if (value === undefined) {
+        sEffect<T>(...trackNesting([fn] as const));
+      } else {
+        sEffect<T>(...trackNesting([fn, value, options] as const));
+      }
+    });
+  }
+}
+
+export { useEffect as createEffect };
