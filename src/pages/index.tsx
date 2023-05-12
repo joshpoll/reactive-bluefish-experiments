@@ -6,6 +6,7 @@ import { Rect } from "./api/Rect";
 import { useState } from "react";
 import { Group } from "./api/Group";
 import { Align, Alignment2D } from "./api/Align";
+import { Ref } from "./api/Ref";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -50,6 +51,9 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      {/* <Bluefish width={500} height={500}>
+        <Rect id="rect1" x={0} y={0} width={width} height={50} fill="red" />
+      </Bluefish> */}
       {/* <Bluefish width={240} height={180}>
           <Rect
             id="singleRect"
@@ -76,7 +80,7 @@ export default function Home() {
               <Rect id="innerRect3" width={50} height={50} fill="green" />
               <Rect id="innerRect4" width={50} height={50} fill="yellow" />
             </Row>
-            {Array.from({ length: 1000 }).map((_, i) => (
+            {Array.from({ length: 500 }).map((_, i) => (
               <Rect
                 key={i}
                 id={`rect${i}`}
@@ -97,16 +101,33 @@ export default function Home() {
         </Group>
       </Bluefish>
       {/* Alignment Tests */}
-      <Bluefish width={1000} height={180}>
-        <Align x={0} y={0} id="align1" alignment={alignment}>
+      {/* <Bluefish width={1000} height={180}>
+        <Align x={0} y={0} id="align1-old" alignment={alignment}>
           <Rect
-            id="innerRect11"
+            id="innerRect11-old"
             x={50}
             width={100}
             height={150}
             fill="steelblue"
           />
+          <Rect id="innerRect21-old" width={50} height={50} fill="lightgreen" />
+        </Align>
+      </Bluefish> */}
+      <Bluefish width={1000} height={200}>
+        <Align x={0} y={0} id="align1" alignment={"left"}>
+          <Rect
+            id="innerRect11"
+            x={50}
+            y={50}
+            width={100}
+            height={150}
+            fill="steelblue"
+          />
           <Rect id="innerRect21" width={50} height={50} fill="lightgreen" />
+        </Align>
+        <Align x={0} y={0} id="align2" alignment={"bottom"}>
+          <Ref id="ref1" refId="innerRect11" />
+          <Ref id="ref2" refId="innerRect21" />
         </Align>
       </Bluefish>
       {/* create a dropdown for picking the alignment */}

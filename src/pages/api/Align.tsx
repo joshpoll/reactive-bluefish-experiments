@@ -100,7 +100,7 @@ type AlignProps = PropsWithChildren<{
 
 export const Align: React.FC<AlignProps> = (props) => {
   const { children, id } = props;
-  const [scenegraph, setNode, getBBox, setSmartBBox] = useScenegraph();
+  const [scenegraph, setNode, getBBox, setSmartBBox, getNode] = useScenegraph();
 
   const layout = useCallback(
     (childIds: Id[]) => {
@@ -160,8 +160,9 @@ export const Align: React.FC<AlignProps> = (props) => {
         })
         .filter(
           ([placeable, value]) =>
-            scenegraph[placeable!].transformOwners.translate.y !== id &&
-            value !== undefined
+            // scenegraph[placeable!].transformOwners.translate.y !== id &&
+            getNode(scenegraph, placeable! as any).transformOwners.translate
+              .y !== id && value !== undefined
         );
 
       const verticalValue =
@@ -192,8 +193,9 @@ export const Align: React.FC<AlignProps> = (props) => {
         })
         .filter(
           ([placeable, value]) =>
-            scenegraph[placeable!].transformOwners.translate.x !== id &&
-            value !== undefined
+            // scenegraph[placeable!].transformOwners.translate.x !== id &&
+            getNode(scenegraph, placeable! as any).transformOwners.translate
+              .x !== id && value !== undefined
         );
 
       const horizontalValue =
@@ -203,8 +205,12 @@ export const Align: React.FC<AlignProps> = (props) => {
 
       for (const [placeable, alignment] of verticalPlaceables) {
         if (
-          scenegraph[placeable!].transformOwners.translate.y !== undefined &&
-          scenegraph[placeable!].transformOwners.translate.y !== id
+          // scenegraph[placeable!].transformOwners.translate.y !== undefined &&
+          // scenegraph[placeable!].transformOwners.translate.y !== id
+          getNode(scenegraph, placeable! as any).transformOwners.translate.y !==
+            undefined &&
+          getNode(scenegraph, placeable! as any).transformOwners.translate.y !==
+            id
         )
           continue;
         const [verticalAlignment, horizontalAlignment] = alignment!;
@@ -217,6 +223,7 @@ export const Align: React.FC<AlignProps> = (props) => {
           }
           setSmartBBox(placeable!, { top: verticalValue - height / 2 }, id);
         } else if (verticalAlignment === "bottom") {
+          console.log("bottom alignment", placeable, getBBox(placeable!));
           // placeable!.bottom = verticalValue;
           setSmartBBox(
             placeable!,
@@ -228,8 +235,12 @@ export const Align: React.FC<AlignProps> = (props) => {
 
       for (const [placeable, alignment] of horizontalPlaceables) {
         if (
-          scenegraph[placeable!].transformOwners.translate.x !== undefined &&
-          scenegraph[placeable!].transformOwners.translate.x !== id
+          // scenegraph[placeable!].transformOwners.translate.x !== undefined &&
+          // scenegraph[placeable!].transformOwners.translate.x !== id
+          getNode(scenegraph, placeable! as any).transformOwners.translate.x !==
+            undefined &&
+          getNode(scenegraph, placeable! as any).transformOwners.translate.x !==
+            id
         )
           continue;
         const [verticalAlignment, horizontalAlignment] = alignment!;
@@ -284,7 +295,16 @@ export const Align: React.FC<AlignProps> = (props) => {
         bbox: { left, top, right, bottom, width, height },
       };
     },
-    [getBBox, id, props.alignment, props.x, props.y, scenegraph, setSmartBBox]
+    [
+      getBBox,
+      getNode,
+      id,
+      props.alignment,
+      props.x,
+      props.y,
+      scenegraph,
+      setSmartBBox,
+    ]
   );
 
   const paint = useCallback(

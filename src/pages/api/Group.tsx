@@ -11,29 +11,27 @@ export type GroupProps = {
 
 export const Group: React.FC<GroupProps> = (props) => {
   const { x, y, children } = props;
-  const [scenegraph] = useScenegraph();
+  const [scenegraph, _, getBBox] = useScenegraph();
 
   const layout = useCallback(
     (childIds: Id[]) => {
       const left = Math.min(
-        ...childIds.map((childId) => scenegraph[childId]?.bbox.left ?? 0)
+        ...childIds.map((childId) => getBBox(childId).left ?? 0)
       );
       const right = Math.max(
         ...childIds.map(
           (childId) =>
-            (scenegraph[childId]?.bbox.left ?? 0) +
-            (scenegraph[childId]?.bbox.width ?? 0)
+            (getBBox(childId).left ?? 0) + (getBBox(childId).width ?? 0)
         )
       );
 
       const top = Math.min(
-        ...childIds.map((childId) => scenegraph[childId]?.bbox.top ?? 0)
+        ...childIds.map((childId) => getBBox(childId).top ?? 0)
       );
       const bottom = Math.max(
         ...childIds.map(
           (childId) =>
-            (scenegraph[childId]?.bbox.top ?? 0) +
-            (scenegraph[childId]?.bbox.height ?? 0)
+            (getBBox(childId).top ?? 0) + (getBBox(childId).height ?? 0)
         )
       );
 
@@ -55,7 +53,7 @@ export const Group: React.FC<GroupProps> = (props) => {
         },
       };
     },
-    [scenegraph, x, y]
+    [getBBox, x, y]
   );
 
   const paint = useCallback(

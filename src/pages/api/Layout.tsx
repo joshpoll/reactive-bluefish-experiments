@@ -10,7 +10,7 @@ import {
   ParentIDContext,
   Transform,
 } from "./solidBBoxStore";
-import { withSolid } from "./ReactSolidState";
+import { createEffect, withSolid } from "./ReactSolidState";
 
 export type Id = string;
 
@@ -33,7 +33,8 @@ export const Layout: React.FC<LayoutProps> = withSolid((props) => {
 
   const parentId = useContext(ParentIDContext);
 
-  const [scenegraph, { setBBox, createNode }] = useContext(BBoxContext)!;
+  const [scenegraph, { setBBox, createNode, getCurrentBBox }] =
+    useContext(BBoxContext)!;
 
   const childIds = useMemo(
     () =>
@@ -54,6 +55,12 @@ export const Layout: React.FC<LayoutProps> = withSolid((props) => {
 
     // TODO: probably have to cleanup ownership here...
   }, [layout, id, scenegraph, setBBox, createNode, childIds, parentId]);
+  // createEffect(() => {
+  //   const { bbox, transform } = layout(childIds);
+  //   setBBox(id, bbox, id, transform);
+
+  //   // TODO: probably have to cleanup ownership here...
+  // });
 
   const Paint = paint;
 

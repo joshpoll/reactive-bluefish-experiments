@@ -12,7 +12,7 @@ export type RowProps = {
 
 export const Row: React.FC<RowProps> = (props) => {
   const { x, y, spacing, children, id } = props;
-  const [scenegraph, setNode] = useScenegraph();
+  const [scenegraph, setNode, getBBox] = useScenegraph();
 
   const layout = useCallback(
     (childIds: Id[]) => {
@@ -20,7 +20,8 @@ export const Row: React.FC<RowProps> = (props) => {
       let posX = 0;
 
       for (const childId of childIds) {
-        const childBBox = scenegraph[childId]?.bbox;
+        // const childBBox = scenegraph[childId]?.bbox;
+        const childBBox = getBBox(childId);
         const beginTime = Date.now();
         if (childBBox !== undefined) {
           setNode(childId, {}, id, {
@@ -34,7 +35,7 @@ export const Row: React.FC<RowProps> = (props) => {
       const width = posX - spacing;
       // height is the max height of all children
       const height = Math.max(
-        ...childIds.map((childId) => scenegraph[childId]?.bbox.height ?? 0)
+        ...childIds.map((childId) => getBBox(childId).height ?? 0)
       );
       // console.timeEnd("layout");
 
@@ -53,7 +54,7 @@ export const Row: React.FC<RowProps> = (props) => {
         },
       };
     },
-    [id, scenegraph, setNode, spacing, x, y]
+    [getBBox, id, setNode, spacing, x, y]
   );
 
   const paint = useCallback(
