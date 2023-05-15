@@ -62,6 +62,7 @@ export type ScenegraphNode =
       transformOwners: TransformOwners;
       worldTransform: Transform;
       children: Set<string>;
+      parent: string | null;
       // parents?: string[];
       // layout?
       // paint?
@@ -71,6 +72,7 @@ export type ScenegraphNode =
       refId: string;
       transform: Transform;
       worldTransform: Transform;
+      parent: string | null;
     };
 
 export const createScenegraph = (): BBoxStore => {
@@ -96,6 +98,7 @@ export const createScenegraph = (): BBoxStore => {
         translate: {},
       },
       children: new Set(),
+      parent: parentId,
     });
 
     if (parentId !== null) {
@@ -112,7 +115,7 @@ export const createScenegraph = (): BBoxStore => {
     }
   };
 
-  const createRef = (id: string, refId: string) => {
+  const createRef = (id: string, refId: string, parentId: string | null) => {
     setScenegraph(id, {
       type: "ref",
       refId,
@@ -122,7 +125,21 @@ export const createScenegraph = (): BBoxStore => {
       worldTransform: {
         translate: {},
       },
+      parent: parentId,
     });
+
+    if (parentId !== null) {
+      setScenegraph(parentId, (node: ScenegraphNode) => {
+        if (node.type === "ref") {
+          console.error("Cannot add children to a ref node.");
+          return node;
+        }
+        return {
+          ...node,
+          children: new Set([...Array.from(node.children), id]),
+        };
+      });
+    }
   };
 
   const getCurrentBBox = (
@@ -291,7 +308,7 @@ export const createScenegraph = (): BBoxStore => {
       },
     };
 
-    if (node.type == "node") {
+    if (node.type === "node") {
       for (const child of Array.from(node.children)) {
         setWorldTransform(child, newWorldTransform);
       }
@@ -330,14 +347,112 @@ export const createScenegraph = (): BBoxStore => {
     });
   };
 
+  const getAncestorChain = (id: string): string[] => {
+    const chain = [];
+    let node = scenegraph[id];
+    while (node.parent !== null) {
+      chain.push(node.parent);
+      node = scenegraph[node.parent];
+    }
+    return chain;
+  };
+
+  const getLCAChain = (id1: string, id2: string): string[] => {
+    const chain1 = getAncestorChain(id1);
+    const chain2 = getAncestorChain(id2);
+
+    const lcaChain = [];
+    for (let i = 0; i < Math.min(chain1.length, chain2.length); i++) {
+      if (chain1[i] === chain2[i]) {
+        lcaChain.push(chain1[i]);
+      } else {
+        break;
+      }
+    }
+
+    return lcaChain;
+  };
+
+  // like getLCAChain, but returns the suffixes of the chains instead
+  const getLCAChainSuffixes = (
+    id1: string,
+    id2: string
+  ): [string[], string[]] => {
+    const chain1 = getAncestorChain(id1);
+    const chain2 = getAncestorChain(id2);
+
+    const lcaChain = [];
+    for (let i = 0; i < Math.min(chain1.length, chain2.length); i++) {
+      if (chain1[i] === chain2[i]) {
+        lcaChain.push(chain1[i]);
+      } else {
+        break;
+      }
+    }
+
+    return [chain1.slice(lcaChain.length), chain2.slice(lcaChain.length)];
+  };
+
   const setSmartBBox = (id: string, bbox: BBox, owner: string) => {
     if (id === "innerRect11") {
       console.log("setSmartBBox", id, bbox, owner);
     }
     setScenegraph(id, (node: ScenegraphNode) => {
       if (node.type === "ref") {
-        console.log("ref", node, bbox, owner);
-        setSmartBBox(node.refId, bbox, owner);
+        // const thisTransform = scenegraph[node.parent!].transform;
+        const [idSuffix, refIdSuffix] = getLCAChainSuffixes(id, node.refId);
+        console.log("idSuffix", idSuffix);
+        console.log("ownerSuffix", refIdSuffix);
+        // accumulate transforms from owner to id
+        let transform = {
+          translate: {
+            x: 0,
+            y: 0,
+          },
+        };
+        // first go up the refId chain
+        for (const node of refIdSuffix) {
+          transform = {
+            translate: {
+              x:
+                (scenegraph[node].transform.translate.x ?? 0) +
+                (transform.translate.x ?? 0),
+              y:
+                (scenegraph[node].transform.translate.y ?? 0) +
+                (transform.translate.y ?? 0),
+            },
+          };
+        }
+
+        // then go down the id chain
+        for (const id of idSuffix) {
+          transform = {
+            translate: {
+              x:
+                (transform.translate.x ?? 0) -
+                (scenegraph[id].transform.translate.x ?? 0),
+              y:
+                (transform.translate.y ?? 0) -
+                (scenegraph[id].transform.translate.y ?? 0),
+            },
+          };
+        }
+
+        const newBBox = {
+          left:
+            bbox.left !== undefined
+              ? bbox.left - (transform.translate.x ?? 0)
+              : undefined,
+          top:
+            bbox.top !== undefined
+              ? bbox.top - (transform.translate.y ?? 0)
+              : undefined,
+          width: bbox.width,
+          height: bbox.height,
+        };
+
+        console.log("setSmartBBox ref", id, transform, newBBox, owner);
+        setSmartBBox(node.refId, newBBox, owner);
         return node;
       }
 
@@ -607,7 +722,7 @@ export type BBoxStore = [
       transform?: Transform
     ) => void;
     createNode: (id: string, parentId: string | null) => void;
-    createRef: (id: string, refId: string) => void;
+    createRef: (id: string, refId: string, parentId: string | null) => void;
   }
 ];
 

@@ -28,7 +28,7 @@ export const Ref: React.FC<RefProps> = withSolid((props) => {
   const parentId = useContext(ParentIDContext);
 
   if (scenegraph[id] === undefined) {
-    createRef(id, refId);
+    createRef(id, refId, parentId);
     // createNode(id, parentId);
   }
 

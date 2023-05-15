@@ -65,6 +65,7 @@ export const Layout: React.FC<LayoutProps> = withSolid((props) => {
   const Paint = paint;
 
   const currentBbox = () =>
+    // NOTE: this is safe b/c Layout only creates normal nodes, not refs
     scenegraph[id]?.bbox ?? {
       left: 0,
       top: 0,

@@ -5,7 +5,7 @@ import { Row } from "./api/Row";
 import { Rect } from "./api/Rect";
 import { useState } from "react";
 import { Group } from "./api/Group";
-import { Align, Alignment2D } from "./api/Align";
+import { Align, Alignment1D, Alignment2D } from "./api/Align";
 import { Ref } from "./api/Ref";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -48,6 +48,9 @@ export default function Home() {
   const [xPos, setXPos] = useState(10);
 
   const [alignment, setAlignment] = useState<Alignment2D>("center");
+
+  const [verticalAlignment, setVerticalAlignment] =
+    useState<Alignment1D>("top");
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -113,8 +116,8 @@ export default function Home() {
           <Rect id="innerRect21-old" width={50} height={50} fill="lightgreen" />
         </Align>
       </Bluefish> */}
-      <Bluefish width={1000} height={200}>
-        <Align x={0} y={0} id="align1" alignment={"left"}>
+      <Bluefish id={"ref-test"} width={1000} height={200}>
+        <Align x={0} id="align1" alignment={"left"}>
           <Rect
             id="innerRect11"
             x={50}
@@ -125,9 +128,13 @@ export default function Home() {
           />
           <Rect id="innerRect21" width={50} height={50} fill="lightgreen" />
         </Align>
-        <Align x={0} y={0} id="align2" alignment={"bottom"}>
+        <Align x={0} id="align2" alignment={verticalAlignment}>
           <Ref id="ref1" refId="innerRect11" />
           <Ref id="ref2" refId="innerRect21" />
+        </Align>
+        <Align id="align3" alignment="center">
+          <Ref id="ref3" refId="innerRect21" />
+          <Rect id="innerRect31" width={20} height={20} fill="pink" />
         </Align>
       </Bluefish>
       {/* create a dropdown for picking the alignment */}
@@ -144,6 +151,14 @@ export default function Home() {
         <option value="bottomLeft">Bottom Left</option>
         <option value="bottomCenter">Bottom Center</option>
         <option value="bottomRight">Bottom Right</option>
+      </select>
+      <select
+        value={verticalAlignment}
+        onChange={(e) => setVerticalAlignment(e.target.value as Alignment1D)}
+      >
+        <option value="top">Top</option>
+        <option value="centerVertically">Center</option>
+        <option value="bottom">Bottom</option>
       </select>
       <input
         type="range"
