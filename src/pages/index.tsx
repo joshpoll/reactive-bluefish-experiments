@@ -68,7 +68,7 @@ export default function Home() {
           />
         </Bluefish> */}
       {/* <RowTest spacing={spacing} horizontal={horizontal} /> */}
-      <Bluefish width={1000} height={180}>
+      {/* <Bluefish width={1000} height={180}>
         <Group id="group">
           <Row id="outerRow" x={50} spacing={spacing * 2}>
             <Rect
@@ -102,7 +102,7 @@ export default function Home() {
             fill="red"
           />
         </Group>
-      </Bluefish>
+      </Bluefish> */}
       {/* Alignment Tests */}
       {/* <Bluefish width={1000} height={180}>
         <Align x={0} y={0} id="align1-old" alignment={alignment}>
@@ -117,25 +117,25 @@ export default function Home() {
         </Align>
       </Bluefish> */}
       <Bluefish id={"ref-test"} width={1000} height={200}>
-        <Align x={0} id="align1" alignment={"left"}>
+        <Align id="align1" alignment={"left"}>
           <Rect
             id="innerRect11"
-            x={50}
-            y={50}
+            x={32}
+            y={45}
             width={100}
             height={150}
             fill="steelblue"
           />
           <Rect id="innerRect21" width={50} height={50} fill="lightgreen" />
         </Align>
-        <Align x={0} id="align2" alignment={verticalAlignment}>
+        <Align id="align2" alignment={verticalAlignment}>
           <Ref id="ref1" refId="innerRect11" />
           <Ref id="ref2" refId="innerRect21" />
         </Align>
-        <Align id="align3" alignment="center">
+        {/* <Align id="align3" alignment="centerRight">
           <Ref id="ref3" refId="innerRect21" />
-          <Rect id="innerRect31" width={20} height={20} fill="pink" />
-        </Align>
+          <Rect id="innerRect31" width={20} height={20} fill="magenta" />
+        </Align> */}
       </Bluefish>
       {/* create a dropdown for picking the alignment */}
       <select

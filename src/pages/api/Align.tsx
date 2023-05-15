@@ -272,8 +272,19 @@ export const Align: React.FC<AlignProps> = (props) => {
         )
       );
 
-      const top = Math.min(
-        ...childIds.map((childId) => getBBox(childId).top ?? 0)
+      // const top = Math.min(
+      //   ...childIds.map((childId) => getBBox(childId).top ?? 0)
+      // );
+      const top = _.some(
+        childIds.map((childId) => getBBox(childId).top),
+        _.isUndefined
+      )
+        ? undefined
+        : _.min(childIds.map((childId) => getBBox(childId).top));
+      console.log(
+        "top",
+        top,
+        childIds.map((childId) => JSON.parse(JSON.stringify(getBBox(childId))))
       );
       const bottom = Math.max(
         ...childIds.map(
@@ -283,13 +294,16 @@ export const Align: React.FC<AlignProps> = (props) => {
       );
 
       const width = right - left;
-      const height = bottom - top;
+      const height = top !== undefined ? bottom - top : undefined;
 
       return {
         transform: {
           translate: {
             x: props.x !== undefined ? props.x - left : undefined,
-            y: props.y !== undefined ? props.y - top : undefined,
+            y:
+              props.y !== undefined && top !== undefined
+                ? props.y - top
+                : undefined,
           },
         },
         bbox: { left, top, right, bottom, width, height },
