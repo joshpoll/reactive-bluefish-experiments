@@ -68,7 +68,7 @@ export default function Home() {
           />
         </Bluefish> */}
       {/* <RowTest spacing={spacing} horizontal={horizontal} /> */}
-      {/* <Bluefish width={1000} height={180}>
+      <Bluefish width={1000} height={180}>
         <Group id="group">
           <Row id="outerRow" x={50} spacing={spacing * 2}>
             <Rect
@@ -102,9 +102,9 @@ export default function Home() {
             fill="red"
           />
         </Group>
-      </Bluefish> */}
+      </Bluefish>
       {/* Alignment Tests */}
-      {/* <Bluefish width={1000} height={180}>
+      <Bluefish width={1000} height={180}>
         <Align x={0} y={0} id="align1-old" alignment={alignment}>
           <Rect
             id="innerRect11-old"
@@ -115,7 +115,7 @@ export default function Home() {
           />
           <Rect id="innerRect21-old" width={50} height={50} fill="lightgreen" />
         </Align>
-      </Bluefish> */}
+      </Bluefish>
       <Bluefish id={"ref-test"} width={1000} height={200}>
         <Align id="align1" alignment={"left"}>
           <Rect

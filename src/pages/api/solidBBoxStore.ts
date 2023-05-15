@@ -1,12 +1,6 @@
 import { createContext, useContext } from "react";
 import { createStore, produce } from "solid-js/store";
 
-/* 
-TODO: should I create a Ref node like Row or like Layout? Should I expose a createRef function? What
-about createNode? It's only used in Layout, so I'm not sure...
-
-*/
-
 export type BBox = {
   left?: number;
   top?: number;
@@ -52,7 +46,6 @@ export type Transform = {
   };
 };
 
-// TODO: need to add Ref nodes to this...
 export type ScenegraphNode =
   | {
       type: "node";
@@ -60,7 +53,6 @@ export type ScenegraphNode =
       transform: Transform;
       bboxOwners: BBoxOwners;
       transformOwners: TransformOwners;
-      worldTransform: Transform;
       children: Set<string>;
       parent: string | null;
       // parents?: string[];
@@ -71,7 +63,6 @@ export type ScenegraphNode =
       type: "ref";
       refId: string;
       transform: Transform;
-      worldTransform: Transform;
       parent: string | null;
     };
 
@@ -92,9 +83,6 @@ export const createScenegraph = (): BBoxStore => {
         translate: {},
       },
       transformOwners: {
-        translate: {},
-      },
-      worldTransform: {
         translate: {},
       },
       children: new Set(),
@@ -122,9 +110,6 @@ export const createScenegraph = (): BBoxStore => {
       transform: {
         translate: {},
       },
-      worldTransform: {
-        translate: {},
-      },
       parent: parentId,
     });
 
@@ -146,66 +131,9 @@ export const createScenegraph = (): BBoxStore => {
     scenegraph: { [key: string]: ScenegraphNode },
     id: string
   ) => {
-    const getNode = () => {
-      let node = scenegraph[id];
-
-      if (node.type === "ref") {
-        let transform: { translate: { x?: number; y?: number } } = {
-          translate: { x: 0, y: 0 },
-        };
-        let currNode: ScenegraphNode = node;
-        while (currNode.type === "ref") {
-          const transformDiff = getTransformDiff(id, currNode.refId);
-          const xUndefined =
-            transform.translate.x === undefined ||
-            transformDiff.translate.x === undefined;
-          const yUndefined =
-            transform.translate.y === undefined ||
-            transformDiff.translate.y === undefined;
-          transform = {
-            translate: {
-              x: !xUndefined
-                ? transform.translate.x! + transformDiff.translate.x!
-                : undefined,
-              y: !yUndefined
-                ? transform.translate.y! + transformDiff.translate.y!
-                : undefined,
-            },
-          };
-          currNode = scenegraph[currNode.refId];
-        }
-
-        return {
-          ...node,
-          bbox: currNode.bbox,
-          transform,
-        };
-      }
-      // const destinationTransform = node.worldTransform;
-      // while (node.type === "ref") {
-      //   node = scenegraph[node.refId];
-      // }
-      // now apply the difference between the node's worldTransform and the destinationTransform
-      // TODO: this is probably completely wrong...
-      // return {
-      //   ...node,
-      //   worldTransform: {
-      //     translate: {
-      //       x:
-      //         (node.worldTransform.translate.x ?? 0) -
-      //         (destinationTransform.translate.x ?? 0),
-      //       y:
-      //         (node.worldTransform.translate.y ?? 0) -
-      //         (destinationTransform.translate.y ?? 0),
-      //     },
-      //   },
-      // };
-      return node;
-    };
-
     return {
       get left() {
-        const node = getNode();
+        const node = getNode(scenegraph, id);
         if (
           node.bbox.left === undefined ||
           node.transform.translate.x === undefined
@@ -216,7 +144,7 @@ export const createScenegraph = (): BBoxStore => {
         return node.bbox.left + node.transform.translate.x;
       },
       get top() {
-        const node = getNode();
+        const node = getNode(scenegraph, id);
 
         if (
           node.bbox.top === undefined ||
@@ -228,11 +156,11 @@ export const createScenegraph = (): BBoxStore => {
         return node.bbox.top + node.transform.translate.y;
       },
       get width() {
-        const node = getNode();
+        const node = getNode(scenegraph, id);
         return node.bbox.width;
       },
       get height() {
-        const node = getNode();
+        const node = getNode(scenegraph, id);
         return node.bbox.height;
       },
     };
@@ -243,10 +171,6 @@ export const createScenegraph = (): BBoxStore => {
     id: string
   ): ScenegraphNode & { type: "node" } => {
     let node = scenegraph[id];
-    // const destinationTransform = node.worldTransform;
-    // while (node.type === "ref") {
-    //   node = scenegraph[node.refId];
-    // }
     if (node.type === "ref") {
       let transform: { translate: { x?: number; y?: number } } = {
         translate: { x: 0, y: 0 },
@@ -275,85 +199,16 @@ export const createScenegraph = (): BBoxStore => {
 
       return {
         ...currNode,
-        // bbox: currNode.bbox,
         transform,
       };
     }
-    // now apply the difference between the node's worldTransform and the destinationTransform
-    return {
-      ...node,
-      // worldTransform: {
-      //   translate: {
-      //     x:
-      //       (node.worldTransform.translate.x ?? 0) -
-      //       (destinationTransform.translate.x ?? 0),
-      //     y:
-      //       (node.worldTransform.translate.y ?? 0) -
-      //       (destinationTransform.translate.y ?? 0),
-      //   },
-      // },
-    };
+    return node;
   };
 
   const getBBox = (id: string) => {
-    const getNode = () => {
-      let node = scenegraph[id];
-      // const destinationTransform = node.worldTransform;
-      // while (node.type === "ref") {
-      //   node = scenegraph[node.refId];
-      // }
-      if (node.type === "ref") {
-        let transform: { translate: { x?: number; y?: number } } = {
-          translate: { x: 0, y: 0 },
-        };
-        let currNode: ScenegraphNode = node;
-        while (currNode.type === "ref") {
-          const transformDiff = getTransformDiff(id, currNode.refId);
-          const xUndefined =
-            transform.translate.x === undefined ||
-            transformDiff.translate.x === undefined;
-          const yUndefined =
-            transform.translate.y === undefined ||
-            transformDiff.translate.y === undefined;
-          transform = {
-            translate: {
-              x: !xUndefined
-                ? transform.translate.x! + transformDiff.translate.x!
-                : undefined,
-              y: !yUndefined
-                ? transform.translate.y! + transformDiff.translate.y!
-                : undefined,
-            },
-          };
-          currNode = scenegraph[currNode.refId];
-        }
-
-        return {
-          ...node,
-          bbox: currNode.bbox,
-          transform,
-        };
-      }
-      // now apply the difference between the node's worldTransform and the destinationTransform
-      // TODO: this is probably completely wrong...
-      return {
-        ...node,
-        // worldTransform: {
-        //   translate: {
-        //     x:
-        //       (node.worldTransform.translate.x ?? 0) -
-        //       (destinationTransform.translate.x ?? 0),
-        //     y:
-        //       (node.worldTransform.translate.y ?? 0) -
-        //       (destinationTransform.translate.y ?? 0),
-        //   },
-        // },
-      };
-    };
-
     return {
       get left() {
-        const node = getNode();
+        const node = getNode(scenegraph, id);
         if (
           node.bbox.left === undefined ||
           node.transform.translate.x === undefined
@@ -364,7 +219,7 @@ export const createScenegraph = (): BBoxStore => {
         return node.bbox.left + node.transform.translate.x;
       },
       get top() {
-        const node = getNode();
+        const node = getNode(scenegraph, id);
 
         if (
           node.bbox.top === undefined ||
@@ -376,73 +231,16 @@ export const createScenegraph = (): BBoxStore => {
         return node.bbox.top + node.transform.translate.y;
       },
       get width() {
-        const node = getNode();
+        const node = getNode(scenegraph, id);
+
         return node.bbox.width;
       },
       get height() {
-        const node = getNode();
+        const node = getNode(scenegraph, id);
+
         return node.bbox.height;
       },
     };
-  };
-
-  // returns the new world transform and also updates the world transforms of its children
-  // TODO: hopefully I can nest calls to setScenegraph...
-  const updateWorldTransform = (
-    node: ScenegraphNode,
-    newTransform: Transform // our new transform
-  ): Transform => {
-    const diffTransform = {
-      translate: {
-        x: (newTransform.translate.x ?? 0) - (node.transform.translate.x ?? 0),
-        y: (newTransform.translate.y ?? 0) - (node.transform.translate.y ?? 0),
-      },
-    };
-
-    const newWorldTransform = {
-      translate: {
-        x: (node.worldTransform?.translate.x ?? 0) + diffTransform.translate.x,
-        y: (node.worldTransform?.translate.y ?? 0) + diffTransform.translate.y,
-      },
-    };
-
-    if (node.type === "node") {
-      for (const child of Array.from(node.children)) {
-        setWorldTransform(child, newWorldTransform);
-      }
-    }
-
-    return newWorldTransform;
-  };
-
-  const setWorldTransform = (
-    id: string,
-    parentWorldTransform: Transform
-  ): void => {
-    setScenegraph(id, (node: ScenegraphNode) => {
-      // compose node's transform with parentWorldTransform
-      const newWorldTransform = {
-        translate: {
-          x:
-            (node.transform.translate.x ?? 0) +
-            (parentWorldTransform.translate.x ?? 0),
-          y:
-            (node.transform.translate.y ?? 0) +
-            (parentWorldTransform.translate.y ?? 0),
-        },
-      };
-
-      if (node.type === "node") {
-        for (const child of Array.from(node.children)) {
-          setWorldTransform(child, newWorldTransform);
-        }
-      }
-
-      return {
-        ...node,
-        worldTransform: newWorldTransform,
-      };
-    });
   };
 
   const getAncestorChain = (id: string): string[] => {
@@ -781,14 +579,11 @@ export const createScenegraph = (): BBoxStore => {
         translate: newTranslate,
       };
 
-      const newWorldTransform = updateWorldTransform(node, newTransform);
-
       return {
         bbox: newBBox,
         bboxOwners: newBBoxOwners,
         transform: newTransform,
         transformOwners: newTransformOwners,
-        worldTransform: newWorldTransform,
         children: node.children,
       };
     });
@@ -898,14 +693,11 @@ export const createScenegraph = (): BBoxStore => {
         translate: newTranslate,
       };
 
-      const newWorldTransform = updateWorldTransform(node, newTransform);
-
       return {
         bbox: newBBox,
         bboxOwners: newBBoxOwners,
         transform: newTransform,
         transformOwners: newTransformOwners,
-        worldTransform: newWorldTransform,
         children: node.children,
       };
     });
