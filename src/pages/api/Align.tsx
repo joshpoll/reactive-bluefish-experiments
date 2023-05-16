@@ -245,6 +245,7 @@ export const Align: React.FC<AlignProps> = (props) => {
           continue;
         const [verticalAlignment, horizontalAlignment] = alignment!;
         if (horizontalAlignment === "left") {
+          console.log("left alignment", placeable, horizontalValue, id);
           setSmartBBox(placeable!, { left: horizontalValue }, id);
         } else if (horizontalAlignment === "center") {
           const width = getBBox(placeable!).width;

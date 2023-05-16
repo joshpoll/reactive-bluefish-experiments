@@ -2,6 +2,7 @@ import { PropsWithChildren, useEffect, useId, useMemo, useRef } from "react";
 // import { BBoxContext, BBoxStore } from "./bboxStore";
 import {
   BBoxContext,
+  ParentIDContext,
   ScenegraphNode,
   createScenegraph,
 } from "./solidBBoxStore";
@@ -28,6 +29,7 @@ export const Bluefish = (props: BluefishProps) => {
   const wroteToWindow = useRef(false);
 
   const scenegraph = bboxStore[0];
+  const { createNode } = bboxStore[1];
 
   useEffect(() => {
     if (window.bluefish === undefined) {
@@ -49,15 +51,21 @@ export const Bluefish = (props: BluefishProps) => {
     };
   });
 
+  if (scenegraph[id] === undefined) {
+    createNode(id, null);
+  }
+
   return (
     <BBoxContext.Provider value={bboxStore}>
-      <svg
-        width={props.width}
-        height={props.height}
-        viewBox={`0 0 ${props.width} ${props.height}`}
-      >
-        {props.children}
-      </svg>
+      <ParentIDContext.Provider value={id}>
+        <svg
+          width={props.width}
+          height={props.height}
+          viewBox={`0 0 ${props.width} ${props.height}`}
+        >
+          {props.children}
+        </svg>
+      </ParentIDContext.Provider>
     </BBoxContext.Provider>
   );
 };

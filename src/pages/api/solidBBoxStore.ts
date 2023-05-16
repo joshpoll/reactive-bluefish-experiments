@@ -1,5 +1,7 @@
+import { set } from "lodash";
 import { createContext, useContext } from "react";
 import { createStore, produce } from "solid-js/store";
+import { getLCAChainSuffixes, getTransformDiff } from "./LCAUtil";
 
 export type BBox = {
   left?: number;
@@ -65,6 +67,65 @@ export type ScenegraphNode =
       transform: Transform;
       parent: string | null;
     };
+
+export type Scenegraph = {
+  [key: string]: ScenegraphNode;
+};
+
+export const getNode = (
+  scenegraph: { [key: string]: ScenegraphNode },
+  id: string
+): ScenegraphNode & { type: "node" } => {
+  let node = scenegraph[id];
+  if (node.type === "ref") {
+    let transform: { translate: { x?: number; y?: number } } = {
+      translate: { x: 0, y: 0 },
+    };
+    let currNode: ScenegraphNode = node;
+    while (currNode.type === "ref") {
+      let transformDiff = getTransformDiff(scenegraph, id, currNode.refId);
+      // add currNode.refId's transform to transformDiff
+      const refIdTransform = scenegraph[currNode.refId].transform;
+      transformDiff = {
+        translate: {
+          x:
+            transformDiff.translate.x !== undefined &&
+            refIdTransform.translate.x !== undefined
+              ? transformDiff.translate.x + refIdTransform.translate.x
+              : undefined,
+          y:
+            transformDiff.translate.y !== undefined &&
+            refIdTransform.translate.y !== undefined
+              ? transformDiff.translate.y + refIdTransform.translate.y
+              : undefined,
+        },
+      };
+      const xUndefined =
+        transform.translate.x === undefined ||
+        transformDiff.translate.x === undefined;
+      const yUndefined =
+        transform.translate.y === undefined ||
+        transformDiff.translate.y === undefined;
+      transform = {
+        translate: {
+          x: !xUndefined
+            ? transform.translate.x! + transformDiff.translate.x!
+            : undefined,
+          y: !yUndefined
+            ? transform.translate.y! + transformDiff.translate.y!
+            : undefined,
+        },
+      };
+      currNode = scenegraph[currNode.refId];
+    }
+
+    return {
+      ...currNode,
+      transform,
+    };
+  }
+  return node;
+};
 
 export const createScenegraph = (): BBoxStore => {
   const [scenegraph, setScenegraph] = createStore<{
@@ -166,45 +227,6 @@ export const createScenegraph = (): BBoxStore => {
     };
   };
 
-  const getNode = (
-    scenegraph: { [key: string]: ScenegraphNode },
-    id: string
-  ): ScenegraphNode & { type: "node" } => {
-    let node = scenegraph[id];
-    if (node.type === "ref") {
-      let transform: { translate: { x?: number; y?: number } } = {
-        translate: { x: 0, y: 0 },
-      };
-      let currNode: ScenegraphNode = node;
-      while (currNode.type === "ref") {
-        const transformDiff = getTransformDiff(id, currNode.refId);
-        const xUndefined =
-          transform.translate.x === undefined ||
-          transformDiff.translate.x === undefined;
-        const yUndefined =
-          transform.translate.y === undefined ||
-          transformDiff.translate.y === undefined;
-        transform = {
-          translate: {
-            x: !xUndefined
-              ? transform.translate.x! + transformDiff.translate.x!
-              : undefined,
-            y: !yUndefined
-              ? transform.translate.y! + transformDiff.translate.y!
-              : undefined,
-          },
-        };
-        currNode = scenegraph[currNode.refId];
-      }
-
-      return {
-        ...currNode,
-        transform,
-      };
-    }
-    return node;
-  };
-
   const getBBox = (id: string) => {
     return {
       get left() {
@@ -243,173 +265,24 @@ export const createScenegraph = (): BBoxStore => {
     };
   };
 
-  const getAncestorChain = (id: string): string[] => {
-    const chain = [];
-    let node = scenegraph[id];
-    while (node.parent !== null) {
-      chain.push(node.parent);
-      node = scenegraph[node.parent];
-    }
-    return chain;
-  };
-
-  const getLCAChain = (id1: string, id2: string): string[] => {
-    const chain1 = getAncestorChain(id1);
-    const chain2 = getAncestorChain(id2);
-
-    const lcaChain = [];
-    for (let i = 0; i < Math.min(chain1.length, chain2.length); i++) {
-      if (chain1[i] === chain2[i]) {
-        lcaChain.push(chain1[i]);
-      } else {
-        break;
-      }
-    }
-
-    return lcaChain;
-  };
-
-  // like getLCAChain, but returns the suffixes of the chains instead
-  const getLCAChainSuffixes = (
-    id1: string,
-    id2: string
-  ): [string[], string[]] => {
-    const chain1 = getAncestorChain(id1);
-    const chain2 = getAncestorChain(id2);
-
-    const lcaChain = [];
-    for (let i = 0; i < Math.min(chain1.length, chain2.length); i++) {
-      if (chain1[i] === chain2[i]) {
-        lcaChain.push(chain1[i]);
-      } else {
-        break;
-      }
-    }
-
-    return [chain1.slice(lcaChain.length), chain2.slice(lcaChain.length)];
-  };
-
-  const getTransformDiff = (
-    id1: string,
-    id2: string
-  ): { translate: { x?: number; y?: number } } => {
-    const [id1Suffix, id2Suffix] = getLCAChainSuffixes(id1, id2);
-    console.log(
-      `transformDiff ${id1} ${id2}`,
-      id1Suffix.map((id) => ({
-        id,
-        transform: JSON.parse(JSON.stringify(scenegraph[id].transform)),
-      })),
-      id2Suffix.map((id) => ({
-        id,
-        transform: JSON.parse(JSON.stringify(scenegraph[id].transform)),
-      }))
-    );
-    // accumulate transforms from id1 to id2
-    let transform: {
-      translate: { x?: number; y?: number };
-    } = {
-      translate: {
-        x: 0,
-        y: 0,
-      },
-    };
-
-    // first go up the id2 chain
-    for (const node of id2Suffix) {
-      const xUndefined =
-        scenegraph[node].transform.translate.x === undefined ||
-        transform.translate.x === undefined;
-      const yUndefined =
-        scenegraph[node].transform.translate.y === undefined ||
-        transform.translate.y === undefined;
-      transform = {
-        translate: {
-          x: !xUndefined
-            ? scenegraph[node].transform.translate.x! + transform.translate.x!
-            : undefined,
-          y: !yUndefined
-            ? scenegraph[node].transform.translate.y! + transform.translate.y!
-            : undefined,
-        },
-      };
-    }
-
-    // then go down the id1 chain
-    for (const node of id1Suffix) {
-      const xUndefined =
-        scenegraph[node].transform.translate.x === undefined ||
-        transform.translate.x === undefined;
-      const yUndefined =
-        scenegraph[node].transform.translate.y === undefined ||
-        transform.translate.y === undefined;
-      transform = {
-        translate: {
-          x: !xUndefined
-            ? transform.translate.x! - scenegraph[node].transform.translate.x!
-            : undefined,
-          y: !yUndefined
-            ? transform.translate.y! - scenegraph[node].transform.translate.y!
-            : undefined,
-        },
-      };
-    }
-
-    return transform;
-  };
-
   const setSmartBBox = (id: string, bbox: BBox, owner: string) => {
     if (id === "innerRect11") {
       console.log("setSmartBBox", id, bbox, owner);
     }
     setScenegraph(id, (node: ScenegraphNode) => {
       if (node.type === "ref") {
-        // // const thisTransform = scenegraph[node.parent!].transform;
-        // const [idSuffix, refIdSuffix] = getLCAChainSuffixes(id, node.refId);
-        // console.log("idSuffix", idSuffix);
-        // console.log("ownerSuffix", refIdSuffix);
-        // // accumulate transforms from owner to id
-        // let transform = {
-        //   translate: {
-        //     x: 0,
-        //     y: 0,
-        //   },
-        // };
-        // // first go up the refId chain
-        // for (const node of refIdSuffix) {
-        //   transform = {
-        //     translate: {
-        //       x:
-        //         (scenegraph[node].transform.translate.x ?? 0) +
-        //         (transform.translate.x ?? 0),
-        //       y:
-        //         (scenegraph[node].transform.translate.y ?? 0) +
-        //         (transform.translate.y ?? 0),
-        //     },
-        //   };
-        // }
-
-        // // then go down the id chain
-        // for (const id of idSuffix) {
-        //   transform = {
-        //     translate: {
-        //       x:
-        //         (transform.translate.x ?? 0) -
-        //         (scenegraph[id].transform.translate.x ?? 0),
-        //       y:
-        //         (transform.translate.y ?? 0) -
-        //         (scenegraph[id].transform.translate.y ?? 0),
-        //     },
-        //   };
-        // }
-        const transform = getTransformDiff(id, node.refId);
+        const transform = getTransformDiff(scenegraph, id, node.refId);
 
         if (
           transform.translate.x === undefined &&
           scenegraph[node.refId].type === "node"
         ) {
           // set all the x translates in the chains to 0 if they are not yet defined
-          const [idSuffix, refIdSuffix] = getLCAChainSuffixes(id, node.refId);
+          const [idSuffix, refIdSuffix] = getLCAChainSuffixes(
+            scenegraph,
+            id,
+            node.refId
+          );
           for (const id of idSuffix) {
             if (scenegraph[id].transform.translate.x === undefined) {
               setScenegraph(
@@ -437,7 +310,11 @@ export const createScenegraph = (): BBoxStore => {
           scenegraph[node.refId].type === "node"
         ) {
           // set all the y translates in the chains to 0 if they are not yet defined
-          const [idSuffix, refIdSuffix] = getLCAChainSuffixes(id, node.refId);
+          const [idSuffix, refIdSuffix] = getLCAChainSuffixes(
+            scenegraph,
+            id,
+            node.refId
+          );
           for (const id of idSuffix) {
             if (scenegraph[id].transform.translate.y === undefined) {
               setScenegraph(
@@ -488,6 +365,9 @@ export const createScenegraph = (): BBoxStore => {
       // translate.x to 0.
       // if left is owned by someone else, and translate.x is owned by us, then set translate.x
 
+      // console.log(JSON.parse(JSON.stringify(node.bboxOwners)));
+      // console.log(JSON.parse(JSON.stringify(node.transformOwners)));
+
       if (
         bbox.left !== undefined &&
         node.transformOwners.translate.x !== undefined &&
@@ -528,19 +408,19 @@ export const createScenegraph = (): BBoxStore => {
       };
 
       if (bbox.left !== undefined) {
-        if (node.bboxOwners.left === id) {
+        if (node.bboxOwners.left === owner) {
           proposedBBox.left = bbox.left;
           proposedTransform.translate.x = 0;
-        } else if (node.transformOwners.translate.x === id) {
+        } else if (node.transformOwners.translate.x === owner) {
           proposedTransform.translate.x = bbox.left - node.bbox.left!;
         }
       }
 
       if (bbox.top !== undefined) {
-        if (node.bboxOwners.top === id) {
+        if (node.bboxOwners.top === owner) {
           proposedBBox.top = bbox.top;
           proposedTransform.translate.y = 0;
-        } else if (node.transformOwners.translate.y === id) {
+        } else if (node.transformOwners.translate.y === owner) {
           proposedTransform.translate.y = bbox.top - node.bbox.top!;
         }
       }
