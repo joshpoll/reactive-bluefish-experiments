@@ -21,7 +21,7 @@ import {
   EffectOptions,
 } from "solid-js";
 
-function useForceUpdate() {
+export function useForceUpdate() {
   const [, setTick] = rState(0);
   return rCallback(() => setTick((t) => t + 1), []);
 }

@@ -7,6 +7,7 @@ import {
   getLCAChainSuffixes,
   getTransformDiff,
 } from "./LCAUtil";
+import { useForceUpdate } from "./ReactSolidState";
 
 // https://css-tricks.com/using-requestanimationframe-with-react-hooks/
 const useAnimationFrame = (
@@ -108,19 +109,17 @@ const parseScenegraph = (
 
 export const ScenegraphTree = (props: ScenegraphTreeProps) => {
   const [tree, setTree] = useState<{ [key: string]: ScenegraphNode }>();
+  const forceUpdate = useForceUpdate();
 
   useAnimationFrame((_deltaTime) => {
     if (window.bluefish !== undefined && props.id in window.bluefish) {
       setTree(window.bluefish[props.id]);
+      forceUpdate();
     }
   });
 
-  const parsedTree = (() => {
-    if (tree === undefined) {
-      return undefined;
-    }
-    return parseScenegraph(tree, tree, props.id);
-  })();
+  const parsedTree =
+    tree === undefined ? undefined : parseScenegraph(tree, tree, props.id);
 
   return (
     <div style={{ width: "50em", height: "50em", border: "1px solid black" }}>
