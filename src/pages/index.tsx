@@ -59,17 +59,17 @@ export default function Home() {
         <Rect id="rect1" x={0} y={0} width={width} height={50} fill="red" />
       </Bluefish> */}
       {/* <Bluefish width={240} height={180}>
-          <Rect
-            id="singleRect"
-            x={xPos}
-            y={20}
-            width={50}
-            height={50}
-            fill="red"
-          />
-        </Bluefish> */}
+        <Rect
+          id="singleRect"
+          x={xPos}
+          y={20}
+          width={50}
+          height={50}
+          fill="red"
+        />
+      </Bluefish> */}
       {/* <RowTest spacing={spacing} horizontal={horizontal} /> */}
-      {/* <Bluefish width={1000} height={180}>
+      <Bluefish width={1000} height={180}>
         <Group id="group">
           <Row id="outerRow" x={50} spacing={spacing * 2}>
             <Rect
@@ -103,7 +103,7 @@ export default function Home() {
             fill="red"
           />
         </Group>
-      </Bluefish> */}
+      </Bluefish>
       {/* Alignment Tests */}
       <Bluefish width={1000} height={180}>
         <Align x={0} y={0} id="align1-old" alignment={alignment}>
@@ -118,7 +118,7 @@ export default function Home() {
         </Align>
       </Bluefish>
       <Bluefish id={"ref-test"} width={1000} height={200}>
-        <Align id="align1" alignment={"left"}>
+        <Align id="align1" alignment={"right"}>
           <Rect
             id="innerRect11"
             x={32}
@@ -133,10 +133,10 @@ export default function Home() {
           <Ref id="ref1" refId="innerRect11" />
           <Ref id="ref2" refId="innerRect21" />
         </Align>
-        {/* <Align id="align3" alignment="centerRight">
+        <Align id="align3" alignment="center">
           <Ref id="ref3" refId="innerRect21" />
-          <Rect id="innerRect31" width={20} height={20} fill="magenta" />
-        </Align> */}
+          <Rect id="innerRect31" width={20} height={30} fill="magenta" />
+        </Align>
       </Bluefish>
       {/* create a dropdown for picking the alignment */}
       <select
@@ -189,7 +189,7 @@ export default function Home() {
         value={width}
         onInput={(e) => setWidth(+e.currentTarget.value)}
       />
-      <ScenegraphTree id={"ref-test"} />
+      {/* <ScenegraphTree id={"ref-test"} /> */}
     </main>
   );
 }

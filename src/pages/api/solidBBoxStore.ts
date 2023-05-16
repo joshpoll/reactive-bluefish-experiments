@@ -1,7 +1,8 @@
 import { set } from "lodash";
 import { createContext, useContext } from "react";
-import { createStore, produce } from "solid-js/store";
+import { SetStoreFunction, createStore, produce } from "solid-js/store";
 import { getLCAChainSuffixes, getTransformDiff } from "./LCAUtil";
+import _ from "lodash";
 
 export type BBox = {
   left?: number;
@@ -74,7 +75,8 @@ export type Scenegraph = {
 
 export const getNode = (
   scenegraph: { [key: string]: ScenegraphNode },
-  id: string
+  id: string,
+  setScenegraph?: SetStoreFunction<Scenegraph>
 ): ScenegraphNode & { type: "node" } => {
   let node = scenegraph[id];
   if (node.type === "ref") {
@@ -84,6 +86,81 @@ export const getNode = (
     let currNode: ScenegraphNode = node;
     while (currNode.type === "ref") {
       let transformDiff = getTransformDiff(scenegraph, id, currNode.refId);
+
+      if (setScenegraph !== undefined) {
+        if (scenegraph[node.refId].type === "node") {
+          // if the refId's translates are fully defined, then define all undefined id translates
+          const [idSuffix, refIdSuffix] = getLCAChainSuffixes(
+            scenegraph,
+            id,
+            node.refId
+          );
+          if (
+            _.every(
+              [currNode.refId, ...refIdSuffix],
+              (id) => scenegraph[id].transform.translate.x !== undefined
+            )
+          ) {
+            for (const id of idSuffix) {
+              if (scenegraph[id].transform.translate.x === undefined) {
+                setScenegraph(
+                  id,
+                  produce((node: ScenegraphNode) => {
+                    node.transform.translate.x = 0;
+                  })
+                );
+              }
+            }
+          }
+        }
+
+        if (scenegraph[node.refId].type === "node") {
+          // if the refId's translates are fully defined, then define all undefined id translates
+          const [idSuffix, refIdSuffix] = getLCAChainSuffixes(
+            scenegraph,
+            id,
+            node.refId
+          );
+          if (
+            _.every(
+              [currNode.refId, ...refIdSuffix],
+              (id) => scenegraph[id].transform.translate.y !== undefined
+            )
+          ) {
+            for (const id of idSuffix) {
+              if (scenegraph[id].transform.translate.y === undefined) {
+                setScenegraph(
+                  id,
+                  produce((node: ScenegraphNode) => {
+                    node.transform.translate.y = 0;
+                  })
+                );
+              }
+            }
+          }
+        }
+      }
+
+      // const [idSuffix, refIdSuffix] = getLCAChainSuffixes(
+      //   scenegraph,
+      //   id,
+      //   node.refId
+      // );
+      // console.log(
+      //   "idSuffix",
+      //   idSuffix,
+      //   idSuffix.map((id) =>
+      //     JSON.parse(JSON.stringify(scenegraph[id].transform))
+      //   )
+      // );
+      // console.log(
+      //   "refIdSuffix",
+      //   [currNode.refId, ...refIdSuffix],
+      //   [currNode.refId, ...refIdSuffix].map((id) =>
+      //     JSON.parse(JSON.stringify(scenegraph[id].transform))
+      //   )
+      // );
+
       // add currNode.refId's transform to transformDiff
       const refIdTransform = scenegraph[currNode.refId].transform;
       transformDiff = {
@@ -228,9 +305,10 @@ export const createScenegraph = (): BBoxStore => {
   };
 
   const getBBox = (id: string) => {
+    const node = getNode(scenegraph, id, setScenegraph);
     return {
       get left() {
-        const node = getNode(scenegraph, id);
+        // const node = getNode(scenegraph, id, setScenegraph);
         if (
           node.bbox.left === undefined ||
           node.transform.translate.x === undefined
@@ -241,7 +319,7 @@ export const createScenegraph = (): BBoxStore => {
         return node.bbox.left + node.transform.translate.x;
       },
       get top() {
-        const node = getNode(scenegraph, id);
+        // const node = getNode(scenegraph, id, setScenegraph);
 
         if (
           node.bbox.top === undefined ||
@@ -253,12 +331,12 @@ export const createScenegraph = (): BBoxStore => {
         return node.bbox.top + node.transform.translate.y;
       },
       get width() {
-        const node = getNode(scenegraph, id);
+        // const node = getNode(scenegraph, id, setScenegraph);
 
         return node.bbox.width;
       },
       get height() {
-        const node = getNode(scenegraph, id);
+        // const node = getNode(scenegraph, id, setScenegraph);
 
         return node.bbox.height;
       },
@@ -266,7 +344,23 @@ export const createScenegraph = (): BBoxStore => {
   };
 
   const setSmartBBox = (id: string, bbox: BBox, owner: string) => {
-    if (id === "innerRect11") {
+    // if any of the bbox values are NaN (undefined is ok), console.error and skip
+    if (
+      (bbox.left !== undefined && isNaN(bbox.left)) ||
+      (bbox.top !== undefined && isNaN(bbox.top)) ||
+      (bbox.width !== undefined && isNaN(bbox.width)) ||
+      (bbox.height !== undefined && isNaN(bbox.height))
+    ) {
+      // error message should include id, bbox, owner
+      console.error(
+        `setSmartBBox: ${owner} tried to update ${id}'s bbox with ${JSON.stringify(
+          bbox
+        )}, but the bbox contains NaN values. Skipping...`
+      );
+      return;
+    }
+
+    if (id === "innerRect31") {
       console.log("setSmartBBox", id, bbox, owner);
     }
     setScenegraph(id, (node: ScenegraphNode) => {

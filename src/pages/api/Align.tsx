@@ -104,6 +104,13 @@ export const Align: React.FC<AlignProps> = (props) => {
 
   const layout = useCallback(
     (childIds: Id[]) => {
+      // TODO: this is currently side-effectful and cannot be removed. I think this is because the ref
+      // bbox is not updated until it is read, and this update does not seem propagate until the
+      // next read.
+      // we either need to change how we maintain ref invariants, or we just need to call getBBox
+      // before invoking layout
+      childIds.forEach(getBBox);
+
       const alignments: [
         VerticalAlignment | undefined,
         HorizontalAlignment | undefined
@@ -140,6 +147,13 @@ export const Align: React.FC<AlignProps> = (props) => {
         .map(([placeable, alignment]) => {
           const [verticalAlignment, horizontalAlignment] = alignment!;
           if (verticalAlignment === "top") {
+            // console.log(
+            //   "candidate verticalValue",
+            //   placeable,
+            //   getBBox(placeable!).top
+            //   // JSON.parse(JSON.stringify(getNode(scenegraph, placeable!)))
+            // );
+            // const top = getBBox(placeable!).top;
             return [placeable, getBBox(placeable!).top];
           } else if (verticalAlignment === "center") {
             const top = getBBox(placeable!).top;
@@ -173,6 +187,12 @@ export const Align: React.FC<AlignProps> = (props) => {
         .map(([placeable, alignment]) => {
           const [verticalAlignment, horizontalAlignment] = alignment!;
           if (horizontalAlignment === "left") {
+            console.log(
+              "candidate horizontalValue",
+              placeable,
+              getBBox(placeable!).left,
+              JSON.parse(JSON.stringify(getNode(scenegraph, placeable!)))
+            );
             return [placeable, getBBox(placeable!).left];
           } else if (horizontalAlignment === "center") {
             const left = getBBox(placeable!).left;
@@ -198,6 +218,8 @@ export const Align: React.FC<AlignProps> = (props) => {
               .x !== id && value !== undefined
         );
 
+      console.log("horizontalValueArr", horizontalValueArr);
+
       const horizontalValue =
         horizontalValueArr.length === 0
           ? 0
@@ -215,6 +237,12 @@ export const Align: React.FC<AlignProps> = (props) => {
           continue;
         const [verticalAlignment, horizontalAlignment] = alignment!;
         if (verticalAlignment === "top") {
+          console.log(
+            "top alignment",
+            verticalValue,
+            placeable,
+            JSON.parse(JSON.stringify(getBBox(placeable!)))
+          );
           setSmartBBox(placeable!, { top: verticalValue }, id);
         } else if (verticalAlignment === "center") {
           const height = getBBox(placeable!).height;
@@ -245,7 +273,12 @@ export const Align: React.FC<AlignProps> = (props) => {
           continue;
         const [verticalAlignment, horizontalAlignment] = alignment!;
         if (horizontalAlignment === "left") {
-          console.log("left alignment", placeable, horizontalValue, id);
+          console.log(
+            "left alignment",
+            horizontalValue,
+            placeable,
+            JSON.parse(JSON.stringify(getBBox(placeable!)))
+          );
           setSmartBBox(placeable!, { left: horizontalValue }, id);
         } else if (horizontalAlignment === "center") {
           const width = getBBox(placeable!).width;
@@ -263,44 +296,63 @@ export const Align: React.FC<AlignProps> = (props) => {
         }
       }
 
-      const left = Math.min(
-        ...childIds.map((childId) => getBBox(childId).left ?? 0)
-      );
-      const right = Math.max(
-        ...childIds.map(
-          (childId) =>
-            (getBBox(childId).left ?? 0) + (getBBox(childId).width ?? 0)
-        )
-      );
+      const left = _.some(
+        childIds.map((childId) => getBBox(childId).left),
+        _.isUndefined
+      )
+        ? undefined
+        : _.min(childIds.map((childId) => getBBox(childId).left));
 
-      // const top = Math.min(
-      //   ...childIds.map((childId) => getBBox(childId).top ?? 0)
-      // );
+      const right =
+        _.some(
+          childIds.map((childId) => getBBox(childId).left),
+          _.isUndefined
+        ) ||
+        _.some(
+          childIds.map((childId) => getBBox(childId).width),
+          _.isUndefined
+        )
+          ? undefined
+          : _.max(
+              childIds.map(
+                (childId) => getBBox(childId).left! + getBBox(childId).width!
+              )
+            );
+
       const top = _.some(
         childIds.map((childId) => getBBox(childId).top),
         _.isUndefined
       )
         ? undefined
         : _.min(childIds.map((childId) => getBBox(childId).top));
-      console.log(
-        "top",
-        top,
-        childIds.map((childId) => JSON.parse(JSON.stringify(getBBox(childId))))
-      );
-      const bottom = Math.max(
-        ...childIds.map(
-          (childId) =>
-            (getBBox(childId).top ?? 0) + (getBBox(childId).height ?? 0)
+      const bottom =
+        _.some(
+          childIds.map((childId) => getBBox(childId).top),
+          _.isUndefined
+        ) ||
+        _.some(
+          childIds.map((childId) => getBBox(childId).height),
+          _.isUndefined
         )
-      );
+          ? undefined
+          : _.max(
+              childIds.map(
+                (childId) => getBBox(childId).top! + getBBox(childId).height!
+              )
+            );
 
-      const width = right - left;
-      const height = top !== undefined ? bottom - top : undefined;
+      const width =
+        left !== undefined && right !== undefined ? right - left : undefined;
+      const height =
+        top !== undefined && bottom !== undefined ? bottom - top : undefined;
 
       return {
         transform: {
           translate: {
-            x: props.x !== undefined ? props.x - left : undefined,
+            x:
+              props.x !== undefined && left !== undefined
+                ? props.x - left
+                : undefined,
             y:
               props.y !== undefined && top !== undefined
                 ? props.y - top

@@ -95,6 +95,14 @@ const parseScenegraph = (
         lcaChainSuffixes: JSON.stringify(
           getLCAChainSuffixes(scenegraph, root, node.refId)
         ),
+        lcaChainSuffixesTransforms: JSON.stringify([
+          getLCAChainSuffixes(scenegraph, root, node.refId)[0].map(
+            (id) => getNode(scenegraph, id).transform
+          ),
+          getLCAChainSuffixes(scenegraph, root, node.refId)[1].map(
+            (id) => getNode(scenegraph, id).transform
+          ),
+        ]),
         transformDiff: `{ ${stringify(
           getTransformDiff(scenegraph, root, node.refId)
         )} }`,
