@@ -147,13 +147,6 @@ export const Align: React.FC<AlignProps> = (props) => {
         .map(([placeable, alignment]) => {
           const [verticalAlignment, horizontalAlignment] = alignment!;
           if (verticalAlignment === "top") {
-            // console.log(
-            //   "candidate verticalValue",
-            //   placeable,
-            //   getBBox(placeable!).top
-            //   // JSON.parse(JSON.stringify(getNode(scenegraph, placeable!)))
-            // );
-            // const top = getBBox(placeable!).top;
             return [placeable, getBBox(placeable!).top];
           } else if (verticalAlignment === "center") {
             const top = getBBox(placeable!).top;
@@ -187,12 +180,6 @@ export const Align: React.FC<AlignProps> = (props) => {
         .map(([placeable, alignment]) => {
           const [verticalAlignment, horizontalAlignment] = alignment!;
           if (horizontalAlignment === "left") {
-            console.log(
-              "candidate horizontalValue",
-              placeable,
-              getBBox(placeable!).left,
-              JSON.parse(JSON.stringify(getNode(scenegraph, placeable!)))
-            );
             return [placeable, getBBox(placeable!).left];
           } else if (horizontalAlignment === "center") {
             const left = getBBox(placeable!).left;
@@ -218,8 +205,6 @@ export const Align: React.FC<AlignProps> = (props) => {
               .x !== id && value !== undefined
         );
 
-      console.log("horizontalValueArr", horizontalValueArr);
-
       const horizontalValue =
         horizontalValueArr.length === 0
           ? 0
@@ -237,12 +222,6 @@ export const Align: React.FC<AlignProps> = (props) => {
           continue;
         const [verticalAlignment, horizontalAlignment] = alignment!;
         if (verticalAlignment === "top") {
-          console.log(
-            "top alignment",
-            verticalValue,
-            placeable,
-            JSON.parse(JSON.stringify(getBBox(placeable!)))
-          );
           setSmartBBox(placeable!, { top: verticalValue }, id);
         } else if (verticalAlignment === "center") {
           const height = getBBox(placeable!).height;
@@ -251,7 +230,6 @@ export const Align: React.FC<AlignProps> = (props) => {
           }
           setSmartBBox(placeable!, { top: verticalValue - height / 2 }, id);
         } else if (verticalAlignment === "bottom") {
-          console.log("bottom alignment", placeable, getBBox(placeable!));
           // placeable!.bottom = verticalValue;
           setSmartBBox(
             placeable!,
@@ -273,12 +251,6 @@ export const Align: React.FC<AlignProps> = (props) => {
           continue;
         const [verticalAlignment, horizontalAlignment] = alignment!;
         if (horizontalAlignment === "left") {
-          console.log(
-            "left alignment",
-            horizontalValue,
-            placeable,
-            JSON.parse(JSON.stringify(getBBox(placeable!)))
-          );
           setSmartBBox(placeable!, { left: horizontalValue }, id);
         } else if (horizontalAlignment === "center") {
           const width = getBBox(placeable!).width;
@@ -401,3 +373,4 @@ export const Align: React.FC<AlignProps> = (props) => {
     </Layout>
   );
 };
+Align.displayName = "Align";

@@ -141,26 +141,6 @@ export const getNode = (
         }
       }
 
-      // const [idSuffix, refIdSuffix] = getLCAChainSuffixes(
-      //   scenegraph,
-      //   id,
-      //   node.refId
-      // );
-      // console.log(
-      //   "idSuffix",
-      //   idSuffix,
-      //   idSuffix.map((id) =>
-      //     JSON.parse(JSON.stringify(scenegraph[id].transform))
-      //   )
-      // );
-      // console.log(
-      //   "refIdSuffix",
-      //   [currNode.refId, ...refIdSuffix],
-      //   [currNode.refId, ...refIdSuffix].map((id) =>
-      //     JSON.parse(JSON.stringify(scenegraph[id].transform))
-      //   )
-      // );
-
       // add currNode.refId's transform to transformDiff
       const refIdTransform = scenegraph[currNode.refId].transform;
       transformDiff = {
@@ -360,9 +340,6 @@ export const createScenegraph = (): BBoxStore => {
       return;
     }
 
-    if (id === "innerRect31") {
-      console.log("setSmartBBox", id, bbox, owner);
-    }
     setScenegraph(id, (node: ScenegraphNode) => {
       if (node.type === "ref") {
         const transform = getTransformDiff(scenegraph, id, node.refId);
@@ -444,7 +421,6 @@ export const createScenegraph = (): BBoxStore => {
           height: bbox.height,
         };
 
-        console.log("setSmartBBox-ref", id, transform, newBBox, owner);
         setSmartBBox(node.refId, newBBox, owner);
         return node;
       }
@@ -458,9 +434,6 @@ export const createScenegraph = (): BBoxStore => {
       // if left and translate.x are both owned by us, then set left to the input value and set
       // translate.x to 0.
       // if left is owned by someone else, and translate.x is owned by us, then set translate.x
-
-      // console.log(JSON.parse(JSON.stringify(node.bboxOwners)));
-      // console.log(JSON.parse(JSON.stringify(node.transformOwners)));
 
       if (
         bbox.left !== undefined &&
@@ -569,12 +542,8 @@ export const createScenegraph = (): BBoxStore => {
     owner: string,
     transform?: Transform
   ) => {
-    if (id === "innerRect11") {
-      console.log("setBBox", id, bbox, owner);
-    }
     setScenegraph(id, (node: ScenegraphNode) => {
       if (node.type === "ref") {
-        console.log("ref", node);
         // console.error("Mutating refs is not currently supported. Skipping.");
         // return node;
         setBBox(node.refId, bbox, owner, transform);

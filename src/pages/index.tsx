@@ -8,6 +8,7 @@ import { Group } from "./api/Group";
 import { Align, Alignment1D, Alignment2D } from "./api/Align";
 import { Ref } from "./api/Ref";
 import { ScenegraphTree } from "./api/ScenegraphVisualizer";
+import { Distribute } from "./api/Distribute";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -138,7 +139,27 @@ export default function Home() {
           <Rect id="innerRect31" width={20} height={30} fill="magenta" />
         </Align>
       </Bluefish>
+      {/* Distribute Tests */}
+      <Bluefish width={1000} height={180}>
+        <Distribute id="distribute1" direction="horizontal" spacing={spacing}>
+          <Rect
+            id="distributeRect1"
+            y={50}
+            width={100}
+            height={150}
+            fill="steelblue"
+          />
+          <Rect
+            id="distributeRect2"
+            y={30}
+            width={50}
+            height={50}
+            fill="lightgreen"
+          />
+        </Distribute>
+      </Bluefish>
       {/* create a dropdown for picking the alignment */}
+      alignment
       <select
         value={alignment}
         onChange={(e) => setAlignment(e.target.value as Alignment2D)}
@@ -153,6 +174,7 @@ export default function Home() {
         <option value="bottomCenter">Bottom Center</option>
         <option value="bottomRight">Bottom Right</option>
       </select>
+      verticalAlignment
       <select
         value={verticalAlignment}
         onChange={(e) => setVerticalAlignment(e.target.value as Alignment1D)}
@@ -161,6 +183,7 @@ export default function Home() {
         <option value="centerVertically">Center</option>
         <option value="bottom">Bottom</option>
       </select>
+      xPos
       <input
         type="range"
         min="0"
@@ -168,6 +191,7 @@ export default function Home() {
         value={xPos}
         onInput={(e) => setXPos(+e.currentTarget.value)}
       />
+      spacing
       <input
         type="range"
         min="0"
@@ -175,6 +199,7 @@ export default function Home() {
         value={spacing}
         onInput={(e) => setSpacing(+e.currentTarget.value)}
       />
+      horizontal
       <input
         type="checkbox"
         checked={horizontal}
@@ -182,6 +207,7 @@ export default function Home() {
           setHorizontal((prev) => !prev);
         }}
       />
+      width
       <input
         type="range"
         min="20"
